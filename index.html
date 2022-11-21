@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Bateria Digital - PH</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' href='css/main.css'>
+</head>
+<body>
+    <img class="logoph" src="images/logo.png" alt="Logo PH colorido">
+    <h1>Bateria Digital</h1>
+
+    <div class="keys">
+        <div data-key="keyq" class="key cantoes">Q</div>
+        <div data-key="keyw" class="key">W</div>
+        <div data-key="keye" class="key cantods">E</div>
+
+        <div data-key="keya" class="key">A</div>
+        <div data-key="keys" class="key">S</div>
+        <div data-key="keyd" class="key">D</div>
+
+        <div data-key="keyz" class="key cantoei">Z</div>
+        <div data-key="keyx" class="key">X</div>
+        <div data-key="keyc" class="key cantodi">C</div>
+    </div>
+    <div class="composer">
+        <input type="text" id="input" placeholder="Escreva sua batida..." />
+        <button onclick="letsPlay()"><img class="iconPlay" src="images/play.png" alt="Ícone do botão tocar com um triângulo apontando para a direita"></button>
+    </div>
+
+    <footer>
+        <p>Desenvolvido por Paulo Henrique - 2022</p>
+    </footer>
+
+    <audio id="s_keyq" src="music/keyq.wav"></audio>
+    <audio id="s_keyw" src="music/keyw.wav"></audio>
+    <audio id="s_keye" src="music/keye.wav"></audio>
+    <audio id="s_keya" src="music/keya.wav"></audio>
+    <audio id="s_keys" src="music/keys.wav"></audio>
+    <audio id="s_keyd" src="music/keyd.wav"></audio>
+    <audio id="s_keyz" src="music/keyz.wav"></audio>
+    <audio id="s_keyx" src="music/keyx.wav"></audio>
+    <audio id="s_keyc" src="music/keyc.wav"></audio>
+    
+    <script src='js/main.js'></script>
+</body>
+</html>
+</body>
+</html>

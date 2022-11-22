@@ -7,7 +7,7 @@ document.body.addEventListener('click', (e) => {
 })
 
 function letsPlay() {
-    let track = document.querySelector('#input').value;
+    let track = document.querySelector('#input').value.toLowerCase();
 
     if(track !== '') {
         let trackArray = track.split('');

@@ -2,6 +2,10 @@ document.body.addEventListener('keyup', (e) => {
     playMusic(e.code.toLowerCase());
 });
 
+document.body.addEventListener('click', (e) => {
+    playMusic((e.target).getAttribute('data-key'));
+})
+
 function letsPlay() {
     let track = document.querySelector('#input').value;
 

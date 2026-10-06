@@ -117,3 +117,14 @@ Evitar motion decorativo contínuo. Respeitar `prefers-reduced-motion`.
 - Gravação é um estado explícito: o botão muda para Finalizar e recebe indicador coral pulsante.
 - Gravação nunca deve remover o acesso ao próprio botão de finalizar durante playback.
 - Export deve refletir o master real da Web Audio engine, incluindo mixer, Swing, kit e performance manual.
+
+
+## Polyphonic lane sequencer
+
+- O sequenciador principal é uma matriz de 9 instrumentos × 16 steps.
+- Linhas preservam a mesma ordem dos pads e a mesma identidade cromática.
+- Colunas representam tempo; todos os hits da mesma coluna são simultâneos.
+- Em telas estreitas, o grid rola horizontalmente dentro do próprio módulo sem gerar overflow na página.
+- O label da lane também seleciona aquele pad como canal ativo do mixer.
+- Quick Pattern permanece como superfície monofônica secundária e não deve fingir representar patterns polifônicos.
+- Compatibilidade com patterns legados é requisito de produto.

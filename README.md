@@ -48,6 +48,8 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - Mute e Solo por pad
 - dois kits: Original e Studio CC0
 - labels instrumentais reais no kit Studio CC0
+- compartilhamento de pattern por URL
+- gravação/exportação do master de áudio
 - layout responsivo
 - suporte a `prefers-reduced-motion`
 
@@ -337,3 +339,22 @@ Kit adicional com nove one-shots CC0 importados do projeto open source Groovie:
 | C | Crash |
 
 A origem e o licenciamento dos arquivos estão documentados em `THIRD_PARTY_SAMPLES.md`.
+
+
+## Compartilhamento
+
+O botão **Compartilhar** serializa o estado de trabalho atual no hash da URL. O link inclui:
+
+- pattern de 16 passos;
+- BPM;
+- Swing;
+- kit ativo;
+- volume, Mute e Solo dos nove pads.
+
+Nenhum dado é enviado para servidor. Ao abrir um link compartilhado, o estado codificado na URL tem precedência sobre o estado local salvo naquele navegador.
+
+## Gravação e exportação
+
+O botão **Gravar** captura o master da Web Audio engine usando `MediaRecorder`. Enquanto a gravação está ativa, pads e playback continuam funcionando normalmente. Ao finalizar, o navegador gera um arquivo de áudio no melhor formato suportado, priorizando Opus/WebM e Opus/Ogg.
+
+A gravação depende de Web Audio + MediaRecorder. Em navegadores sem esse suporte, o restante da drum machine continua funcionando, mas a exportação fica indisponível.

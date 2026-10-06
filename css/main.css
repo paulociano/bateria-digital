@@ -679,6 +679,12 @@ body::before {
     background: #171c26;
 }
 
+.lane-label.is-selected {
+    border-color: color-mix(in srgb, var(--step-color), transparent 35%);
+    background: color-mix(in srgb, var(--step-color), #10141c 88%);
+    color: #fff;
+}
+
 .lane-label__key {
     width: 22px;
     height: 22px;

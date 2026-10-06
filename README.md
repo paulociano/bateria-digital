@@ -31,7 +31,8 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - 9 pads de bateria interativos
 - execução por clique ou teclado
 - samples de áudio individuais
-- sequenciador textual
+- sequenciador visual de 16 passos com edição direta
+- sequenciador textual sincronizado como atalho
 - controle de velocidade entre 70 e 180 BPM
 - feedback visual ao pressionar cada pad
 - feedback de progresso durante a reprodução da sequência
@@ -71,7 +72,9 @@ O pad recebe feedback visual enquanto o som é disparado. Durante uma sequência
 
 ## Sequenciador
 
-O campo **Sequenciador** permite montar uma batida escrevendo uma combinação das teclas disponíveis.
+O sequenciador principal possui **16 passos editáveis**. Selecione um dos nove pads e clique em qualquer passo para inserir ou substituir aquele som. Clicar novamente em um passo que já contém o som selecionado remove o evento.
+
+O campo **Sequenciador rápido** permanece disponível como atalho textual e fica sincronizado com o grid.
 
 Exemplo:
 
@@ -79,9 +82,9 @@ Exemplo:
 qwe asd zxc
 ```
 
-Caracteres que não correspondem aos pads são ignorados.
+Caracteres que não correspondem aos pads são ignorados. Espaço, ponto (`.`) e hífen (`-`) representam pausas reais entre os sons.
 
-Ao clicar em **Tocar**, a sequência é executada na ordem digitada. Espaço, ponto (`.`) e hífen (`-`) representam pausas reais entre os sons. O controle **Loop** repete a sequência, **Parar** interrompe sem apagar o texto e **Limpar** remove apenas o conteúdo do sequenciador.
+Ao editar o texto, os primeiros 16 passos do grid são atualizados. Ao editar o grid, o texto é reescrito usando a tecla de cada pad e hífen para pausas. O controle **Loop** repete a sequência, **Parar** interrompe sem apagar o texto e **Limpar** remove apenas o conteúdo do sequenciador.
 
 ## Controle de BPM
 
@@ -93,13 +96,13 @@ O controle de velocidade permite escolher valores entre:
 
 O tempo selecionado altera o intervalo entre os sons reproduzidos pelo sequenciador.
 
-O cálculo utilizado atualmente é baseado em subdivisões de meio tempo:
+O grid de 16 passos usa subdivisões de semicolcheia, formando um compasso 4/4 completo:
 
 ```javascript
-60000 / BPM / 2
+60000 / BPM / 4
 ```
 
-Assim, valores maiores de BPM produzem sequências mais rápidas.
+Assim, 16 passos correspondem a quatro tempos, e valores maiores de BPM produzem patterns mais rápidos.
 
 ## Arquitetura
 
@@ -111,6 +114,7 @@ bateria-digital/
 ├── css/
 │   └── main.css
 ├── js/
+│   ├── audio-engine.js
 │   └── main.js
 ├── music/
 │   ├── keyq.wav
@@ -136,6 +140,10 @@ Define a interface da drum machine, incluindo:
 - elementos de áudio;
 - status de reprodução.
 
+### `js/audio-engine.js`
+
+Encapsula o carregamento e a reprodução dos samples com Web Audio API, mantendo suporte a fontes simultâneas.
+
 ### `js/main.js`
 
 Concentra o comportamento da aplicação:
@@ -143,7 +151,9 @@ Concentra o comportamento da aplicação:
 - captura de eventos do teclado;
 - execução dos samples;
 - interação com os pads;
-- leitura do sequenciador;
+- edição e sincronização do grid de 16 passos;
+- leitura do sequenciador textual;
+- seleção de pad para edição;
 - controle de BPM;
 - agendamento da sequência;
 - cancelamento dos timers;
@@ -181,9 +191,9 @@ Feedback visual do pad
 No modo sequenciador:
 
 ```text
-Texto digitado
+Grid de 16 passos / texto sincronizado
       ↓
-Filtragem das teclas válidas
+Pattern normalizado
       ↓
 Cálculo do intervalo pelo BPM
       ↓
@@ -216,7 +226,8 @@ Depois acesse `http://localhost:8000`.
 - HTML5
 - CSS3
 - JavaScript
-- HTML Audio
+- Web Audio API
+- HTML Audio como fallback
 - Google Fonts
 
 Nenhuma biblioteca ou framework JavaScript é necessário.

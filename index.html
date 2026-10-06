@@ -82,23 +82,43 @@
                 <button type="button" data-key="keyc" class="key key--green" aria-label="Pad 09, tecla C"><span>C</span><small>PAD 09</small></button>
             </div>
 
+            <section class="step-sequencer" aria-labelledby="step-sequencer-title">
+                <div class="step-sequencer__head">
+                    <div>
+                        <p class="step-sequencer__eyebrow">Pattern</p>
+                        <h2 id="step-sequencer-title">Sequenciador 16 passos</h2>
+                    </div>
+                    <button class="grid-play" id="grid-play" type="button">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.55.83l9.3-6.2a1 1 0 0 0 0-1.66l-9.3-6.2A1 1 0 0 0 8 5.8Z"/></svg>
+                        Tocar pattern
+                    </button>
+                </div>
+
+                <div class="step-sequencer__selection" aria-live="polite">
+                    <span>Som selecionado</span>
+                    <strong id="selected-sound">Pad 01 · Q</strong>
+                </div>
+
+                <div class="step-grid" id="step-grid" role="group" aria-label="16 passos do sequenciador" aria-describedby="step-help"></div>
+                <p class="step-help" id="step-help">Escolha um pad e toque em um passo para adicionar ou substituir o som. Toque novamente no mesmo passo para removê-lo.</p>
+            </section>
+
             <form class="composer" id="composer">
                 <div class="composer-heading">
                     <label for="input">Sequenciador rápido</label>
-                    <span>até 32 caracteres</span>
+                    <span>atalho para 16 passos</span>
                 </div>
                 <div class="composer-row">
                     <div class="input-shell">
                         <span aria-hidden="true">01</span>
-                        <input type="text" id="input" maxlength="32" autocomplete="off" spellcheck="false" placeholder="qwe asd zxc" aria-describedby="input-help">
+                        <input type="text" id="input" maxlength="16" autocomplete="off" spellcheck="false" placeholder="qwe-asd-zxc" aria-describedby="input-help">
                     </div>
                     <button class="play" type="submit" aria-label="Tocar sequência">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.55.83l9.3-6.2a1 1 0 0 0 0-1.66l-9.3-6.2A1 1 0 0 0 8 5.8Z"/></svg>
                         Tocar
                     </button>
                 </div>
-                <p id="input-help">Use Q W E · A S D · Z X C. Espaço, ponto ou hífen criam pausas. Outros caracteres são ignorados. Pressione Esc para parar.</p>
-                <div class="sequence-preview" id="sequence-preview" aria-label="Linha do tempo da sequência"></div>
+                <p id="input-help">Use Q W E · A S D · Z X C. Espaço, ponto ou hífen criam pausas. O texto e o grid ficam sincronizados. Pressione Esc para parar.</p>
             </form>
         </section>
     </main>

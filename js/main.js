@@ -10,7 +10,19 @@ const sampleUrls = {
     keyx: 'music/keyx.wav',
     keyc: 'music/keyc.wav'
 };
+const padLabels = {
+    keyq: 'Pad 01 · Q',
+    keyw: 'Pad 02 · W',
+    keye: 'Pad 03 · E',
+    keya: 'Pad 04 · A',
+    keys: 'Pad 05 · S',
+    keyd: 'Pad 06 · D',
+    keyz: 'Pad 07 · Z',
+    keyx: 'Pad 08 · X',
+    keyc: 'Pad 09 · C'
+};
 
+const GRID_STEPS = 16;
 const composer = document.querySelector('#composer');
 const input = document.querySelector('#input');
 const tempo = document.querySelector('#tempo');
@@ -18,10 +30,13 @@ const tempoValue = document.querySelector('#tempo-value');
 const clearButton = document.querySelector('#clear');
 const stopButton = document.querySelector('#stop');
 const loopButton = document.querySelector('#loop');
+const gridPlayButton = document.querySelector('#grid-play');
+const quickPlayButton = composer.querySelector('.play');
 const machine = document.querySelector('.machine');
 const playbackStatus = document.querySelector('#playback-status');
 const keys = document.querySelector('.keys');
-const sequencePreview = document.querySelector('#sequence-preview');
+const stepGrid = document.querySelector('#step-grid');
+const selectedSoundLabel = document.querySelector('#selected-sound');
 
 const audioEngine = new window.AudioEngine(sampleUrls);
 const LOOK_AHEAD_MS = 25;
@@ -37,6 +52,8 @@ let isPlaying = false;
 let currentPattern = [];
 let currentStep = 0;
 let nextStepTime = 0;
+let selectedSound = 'keyq';
+let gridPattern = Array(GRID_STEPS).fill(null);
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isPlaying) {
@@ -47,27 +64,55 @@ document.addEventListener('keydown', (event) => {
     if (event.repeat || event.target === input) return;
 
     const key = event.key.toLowerCase();
-    if (validKeys.has(key)) playSound(`key${key}`);
+    if (validKeys.has(key)) {
+        const sound = `key${key}`;
+        selectSound(sound);
+        playSound(sound);
+    }
 });
 
 keys.addEventListener('pointerdown', (event) => {
     const pad = event.target.closest('[data-key]');
-    if (pad) playSound(pad.dataset.key);
+    if (!pad) return;
+
+    selectSound(pad.dataset.key);
+    playSound(pad.dataset.key);
 });
 
 keys.addEventListener('click', (event) => {
     if (event.detail !== 0) return;
     const pad = event.target.closest('[data-key]');
-    if (pad) playSound(pad.dataset.key);
+    if (!pad) return;
+
+    selectSound(pad.dataset.key);
+    playSound(pad.dataset.key);
+});
+
+stepGrid.addEventListener('click', (event) => {
+    const step = event.target.closest('[data-step]');
+    if (!step) return;
+
+    if (isPlaying) {
+        playbackStatus.textContent = 'Pare para editar o pattern';
+        return;
+    }
+
+    toggleGridStep(Number(step.dataset.step));
 });
 
 composer.addEventListener('submit', (event) => {
     event.preventDefault();
-    playSequence(parsePattern(input.value));
+    syncGridFromInput();
+    playSequence(gridPattern.slice());
+});
+
+gridPlayButton.addEventListener('click', () => {
+    playSequence(gridPattern.slice());
 });
 
 input.addEventListener('input', () => {
-    if (!isPlaying) renderPattern(parsePattern(input.value));
+    if (isPlaying) return;
+    syncGridFromInput();
 });
 
 tempo.addEventListener('input', updateTempo);
@@ -87,16 +132,16 @@ loopButton.addEventListener('click', () => {
 
 clearButton.addEventListener('click', () => {
     input.value = '';
-    renderPattern([]);
+    gridPattern = Array(GRID_STEPS).fill(null);
+    renderGrid();
     input.focus();
-
-    if (!isPlaying) playbackStatus.textContent = 'Sequência limpa';
+    playbackStatus.textContent = 'Pattern limpo';
 });
 
 function parsePattern(value) {
     const pattern = [];
 
-    [...value.trim().toLowerCase()].forEach((character) => {
+    [...value.toLowerCase()].forEach((character) => {
         if (validKeys.has(character)) {
             pattern.push(`key${character}`);
             return;
@@ -107,28 +152,87 @@ function parsePattern(value) {
         }
     });
 
-    return pattern;
+    return pattern.slice(0, GRID_STEPS);
 }
 
-function renderPattern(pattern) {
-    sequencePreview.innerHTML = '';
+function soundToKey(sound) {
+    return sound ? sound.slice(-1) : '-';
+}
 
-    if (!pattern.length) {
-        const empty = document.createElement('span');
-        empty.className = 'sequence-empty';
-        empty.textContent = 'Sua sequência aparecerá aqui';
-        sequencePreview.appendChild(empty);
-        return;
-    }
+function selectSound(sound) {
+    if (!sampleUrls[sound]) return;
 
-    pattern.forEach((token, index) => {
-        const step = document.createElement('span');
-        step.className = `sequence-step${token ? '' : ' is-rest'}`;
-        step.dataset.step = String(index);
-        step.textContent = token ? token.slice(-1).toUpperCase() : '·';
-        step.setAttribute('aria-label', token ? `Passo ${index + 1}: tecla ${token.slice(-1).toUpperCase()}` : `Passo ${index + 1}: pausa`);
-        sequencePreview.appendChild(step);
+    selectedSound = sound;
+    selectedSoundLabel.textContent = padLabels[sound];
+
+    keys.querySelectorAll('[data-key]').forEach((pad) => {
+        pad.classList.toggle('is-selected', pad.dataset.key === sound);
     });
+
+    renderGrid();
+}
+
+function toggleGridStep(index) {
+    if (!Number.isInteger(index) || index < 0 || index >= GRID_STEPS) return;
+
+    gridPattern[index] = gridPattern[index] === selectedSound ? null : selectedSound;
+    renderGrid();
+    syncInputFromGrid();
+    playbackStatus.textContent = gridPattern[index] ? `Passo ${index + 1} definido` : `Passo ${index + 1} limpo`;
+}
+
+function buildGrid() {
+    stepGrid.innerHTML = '';
+
+    for (let index = 0; index < GRID_STEPS; index += 1) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'step-button';
+        button.dataset.step = String(index);
+
+        const number = document.createElement('span');
+        number.className = 'step-button__number';
+        number.textContent = String(index + 1).padStart(2, '0');
+
+        const value = document.createElement('span');
+        value.className = 'step-button__value';
+        value.textContent = '·';
+
+        button.append(number, value);
+        stepGrid.appendChild(button);
+    }
+}
+
+function renderGrid() {
+    const steps = stepGrid.querySelectorAll('[data-step]');
+
+    steps.forEach((button, index) => {
+        const sound = gridPattern[index];
+        const value = button.querySelector('.step-button__value');
+
+        button.classList.toggle('is-filled', Boolean(sound));
+        button.dataset.sound = sound || '';
+        button.setAttribute('aria-pressed', String(Boolean(sound)));
+        value.textContent = sound ? soundToKey(sound).toUpperCase() : '·';
+
+        const currentValue = sound ? padLabels[sound] : 'pausa';
+        const selectedValue = padLabels[selectedSound];
+        button.setAttribute(
+            'aria-label',
+            `Passo ${index + 1}: ${currentValue}. Clique para ${sound === selectedSound ? 'remover' : `definir ${selectedValue}`}.`
+        );
+    });
+}
+
+function syncGridFromInput() {
+    const parsed = parsePattern(input.value);
+    gridPattern = Array.from({ length: GRID_STEPS }, (_, index) => parsed[index] ?? null);
+    renderGrid();
+}
+
+function syncInputFromGrid() {
+    const serialized = gridPattern.map(soundToKey).join('').replace(/-+$/, '');
+    input.value = serialized;
 }
 
 function updateTempo() {
@@ -168,19 +272,18 @@ async function playSound(sound) {
 
 async function playSequence(pattern) {
     stopSequence({ announce: false });
-    renderPattern(pattern);
 
     if (!pattern.some(Boolean)) {
         playbackStatus.textContent = 'Adicione uma batida';
-        input.focus();
         return;
     }
 
-    currentPattern = pattern;
+    currentPattern = pattern.slice(0, GRID_STEPS);
     currentStep = 0;
     isPlaying = true;
     machine.classList.add('is-playing');
     stopButton.disabled = false;
+    setEditingDisabled(true);
     playbackStatus.textContent = 'Preparando áudio';
 
     const webAudioReady = await ensureAudio();
@@ -268,19 +371,16 @@ function playFallbackCycle() {
 }
 
 function stepDurationSeconds() {
-    return 60 / Number(tempo.value) / 2;
+    return 60 / Number(tempo.value) / 4;
 }
 
 function activateStep(index) {
-    sequencePreview.querySelectorAll('.sequence-step.is-current').forEach((step) => {
+    stepGrid.querySelectorAll('.step-button.is-current').forEach((step) => {
         step.classList.remove('is-current');
     });
 
-    const current = sequencePreview.querySelector(`[data-step="${index}"]`);
-    if (current) {
-        current.classList.add('is-current');
-        current.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    }
+    const current = stepGrid.querySelector(`[data-step="${index}"]`);
+    if (current) current.classList.add('is-current');
 }
 
 function flashPad(sound) {
@@ -339,31 +439,42 @@ function stopAllAudio() {
     });
 }
 
-function finishSequence() {
-    clearPlaybackTimers();
-    stopScheduler();
+function setEditingDisabled(disabled) {
+    input.disabled = disabled;
+    quickPlayButton.disabled = disabled;
+    gridPlayButton.disabled = disabled;
+    clearButton.disabled = disabled;
+
+    stepGrid.querySelectorAll('.step-button').forEach((step) => {
+        step.disabled = disabled;
+    });
+}
+
+function resetPlaybackState(status) {
     isPlaying = false;
     currentStep = 0;
     machine.classList.remove('is-playing');
     stopButton.disabled = true;
-    sequencePreview.querySelectorAll('.sequence-step.is-current').forEach((step) => step.classList.remove('is-current'));
-    playbackStatus.textContent = 'Pronto';
+    setEditingDisabled(false);
+    stepGrid.querySelectorAll('.step-button.is-current').forEach((step) => step.classList.remove('is-current'));
+    playbackStatus.textContent = status;
+}
+
+function finishSequence() {
+    clearPlaybackTimers();
+    stopScheduler();
+    resetPlaybackState('Pronto');
 }
 
 function stopSequence({ announce = true } = {}) {
     clearPlaybackTimers();
     stopScheduler();
     stopAllAudio();
-
-    isPlaying = false;
-    currentStep = 0;
-    machine.classList.remove('is-playing');
-    stopButton.disabled = true;
-    sequencePreview.querySelectorAll('.sequence-step.is-current').forEach((step) => step.classList.remove('is-current'));
-
-    if (announce) playbackStatus.textContent = 'Parado';
+    resetPlaybackState(announce ? 'Parado' : 'Pronto');
 }
 
+buildGrid();
+selectSound(selectedSound);
 updateTempo();
-renderPattern([]);
+syncGridFromInput();
 ensureAudio();

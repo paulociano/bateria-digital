@@ -180,6 +180,27 @@
                             <span class="key-code">C</span><small>PAD 09</small><i aria-hidden="true"></i>
                         </button>
                     </div>
+
+                    <section class="channel-strip" aria-labelledby="channel-strip-title">
+                        <div class="channel-strip__head">
+                            <div>
+                                <span class="control-overline">Mixer</span>
+                                <strong id="channel-strip-title">Canal selecionado</strong>
+                            </div>
+                            <span id="channel-name">Pad 01 · Q</span>
+                        </div>
+
+                        <div class="channel-controls">
+                            <label class="channel-volume" for="channel-volume">
+                                <span>Volume</span>
+                                <output id="channel-volume-value" for="channel-volume">100%</output>
+                                <input id="channel-volume" type="range" min="0" max="100" value="100" step="1" aria-valuetext="100%">
+                            </label>
+
+                            <button class="channel-toggle" id="channel-mute" type="button" aria-pressed="false">Mute</button>
+                            <button class="channel-toggle" id="channel-solo" type="button" aria-pressed="false">Solo</button>
+                        </div>
+                    </section>
                 </section>
 
                 <section class="sequence-bank" aria-labelledby="step-sequencer-title">
@@ -204,6 +225,15 @@
                             <strong id="selected-sound">Pad 01 · Q</strong>
                         </div>
                         <span class="selected-sound-hint">clique nos passos</span>
+                    </div>
+
+                    <div class="swing-control">
+                        <div>
+                            <span class="control-overline">Groove</span>
+                            <label for="swing">Swing</label>
+                        </div>
+                        <input id="swing" type="range" min="50" max="75" value="50" step="1" aria-valuetext="50%">
+                        <output id="swing-value" for="swing">50%</output>
                     </div>
 
                     <div class="step-groups">

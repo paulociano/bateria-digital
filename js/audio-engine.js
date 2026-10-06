@@ -7,6 +7,9 @@
             this.buffers = new Map();
             this.channels = new Map();
             this.activeSources = new Set();
+            this.recordingDestination = null;
+            this.mediaRecorder = null;
+            this.recordedChunks = [];
             this.ready = false;
             this.initializing = null;
         }
@@ -28,6 +31,11 @@
                 this.output = this.context.createGain();
                 this.output.gain.value = 0.92;
                 this.output.connect(this.context.destination);
+
+                if (typeof MediaRecorder !== 'undefined') {
+                    this.recordingDestination = this.context.createMediaStreamDestination();
+                    this.output.connect(this.recordingDestination);
+                }
 
                 const decoded = await Promise.all(
                     Object.entries(this.sampleUrls).map(async ([name, url]) => {
@@ -129,7 +137,55 @@
             });
         }
 
+        canRecord() {
+            return Boolean(this.ready && this.recordingDestination && typeof MediaRecorder !== 'undefined');
+        }
+
+        startRecording() {
+            if (!this.canRecord() || this.mediaRecorder?.state === 'recording') return false;
+
+            const preferredTypes = [
+                'audio/webm;codecs=opus',
+                'audio/ogg;codecs=opus',
+                'audio/webm'
+            ];
+            const mimeType = preferredTypes.find((type) => MediaRecorder.isTypeSupported?.(type)) || '';
+
+            this.recordedChunks = [];
+            this.mediaRecorder = new MediaRecorder(
+                this.recordingDestination.stream,
+                mimeType ? { mimeType } : undefined
+            );
+            this.mediaRecorder.addEventListener('dataavailable', (event) => {
+                if (event.data?.size) this.recordedChunks.push(event.data);
+            });
+            this.mediaRecorder.start();
+            return true;
+        }
+
+        stopRecording() {
+            if (!this.mediaRecorder || this.mediaRecorder.state !== 'recording') {
+                return Promise.resolve(null);
+            }
+
+            return new Promise((resolve) => {
+                const recorder = this.mediaRecorder;
+                recorder.addEventListener('stop', () => {
+                    const type = recorder.mimeType || 'audio/webm';
+                    const blob = new Blob(this.recordedChunks, { type });
+                    this.mediaRecorder = null;
+                    this.recordedChunks = [];
+                    resolve({ blob, type });
+                }, { once: true });
+                recorder.stop();
+            });
+        }
+
         async destroy() {
+            if (this.mediaRecorder?.state === 'recording') {
+                this.mediaRecorder.stop();
+            }
+
             this.stopAll();
 
             if (this.context && this.context.state !== 'closed') {
@@ -140,6 +196,9 @@
             this.output = null;
             this.buffers.clear();
             this.channels.clear();
+            this.recordingDestination = null;
+            this.mediaRecorder = null;
+            this.recordedChunks = [];
             this.ready = false;
             this.initializing = null;
         }

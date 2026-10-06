@@ -339,6 +339,10 @@ function selectSound(sound) {
         pad.classList.toggle('is-selected', pad.dataset.key === sound);
     });
 
+    stepGrid.querySelectorAll('[data-lane-sound]').forEach((label) => {
+        label.classList.toggle('is-selected', label.dataset.laneSound === sound);
+    });
+
     renderGrid();
     renderChannelStrip();
 }

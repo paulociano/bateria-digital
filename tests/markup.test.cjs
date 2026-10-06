@@ -29,3 +29,18 @@ test('motion and mobile breakpoints remain guarded', () => {
     assert.match(css, /@media \(max-width: 520px\)/);
     assert.match(css, /@media \(max-width: 760px\)/);
 });
+
+test('web fonts are requested from head without CSS @import', () => {
+    assert.match(html, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/);
+    assert.match(html, /fonts\.googleapis\.com\/css2/);
+    assert.doesNotMatch(css, /@import\s+url\(/);
+});
+
+test('compact controls keep a 44px minimum touch target', () => {
+    assert.match(css, /\.slot-button,[\s\S]*min-height:\s*44px/);
+    assert.match(css, /\.utility-button[\s\S]*min-height:\s*44px/);
+});
+
+test('higher contrast preference has an explicit treatment', () => {
+    assert.match(css, /@media \(prefers-contrast: more\)/);
+});

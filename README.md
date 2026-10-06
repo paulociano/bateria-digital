@@ -370,3 +370,19 @@ node --test tests/*.test.cjs
 O workflow `.github/workflows/test.yml` executa essa suíte em pull requests.
 
 Para reduzir trabalho na abertura da página, a Web Audio engine não decodifica os samples no carregamento inicial. O carregamento acontece na primeira interação que realmente precisa de áudio.
+
+## Web quality
+
+A interface possui gates estáticos para:
+
+- ordem de carregamento dos scripts;
+- estados ARIA essenciais;
+- reduced motion;
+- breakpoints móveis;
+- ausência de `@import` para web fonts;
+- alvos de toque mínimos nos controles compactos;
+- tratamento para `prefers-contrast: more`.
+
+O workflow de testes roda em pull requests e também após pushes na `main`.
+
+A auditoria em navegador real continua necessária para métricas de Lighthouse/Core Web Vitals, navegação por teclado completa e inspeção auditiva da Web Audio API.

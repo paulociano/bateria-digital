@@ -61,10 +61,10 @@ const GRID_STEPS = 16;
 const STORAGE_KEY = 'bateria-digital:state:v1';
 const SLOT_NAMES = ['A', 'B', 'C', 'D'];
 const DEMO_PATTERN = [
-    'keyq', null, 'keys', null,
-    'keyq', 'keyw', 'keys', null,
-    'keyq', null, 'keys', 'keye',
-    'keyq', 'keyw', 'keys', null
+    ['keyq', 'keye'], ['keye'], ['keys', 'keye'], ['keye'],
+    ['keyq', 'keye'], ['keyw', 'keye'], ['keys', 'keye'], ['keye'],
+    ['keyq', 'keye'], ['keye'], ['keys', 'keye'], ['keyw', 'keye'],
+    ['keyq', 'keye'], ['keyw', 'keye'], ['keys', 'keye'], ['keyx']
 ];
 
 const composer = document.querySelector('#composer');
@@ -112,7 +112,7 @@ let currentPattern = [];
 let currentStep = 0;
 let nextStepTime = 0;
 let selectedSound = 'keyq';
-let gridPattern = Array(GRID_STEPS).fill(null);
+let gridPattern = Array.from({ length: GRID_STEPS }, () => []);
 let activeSlot = 'A';
 let savedSlots = Object.fromEntries(SLOT_NAMES.map((slot) => [slot, null]));
 let tapTimes = [];
@@ -156,7 +156,7 @@ keys.addEventListener('click', (event) => {
 });
 
 stepGrid.addEventListener('click', (event) => {
-    const step = event.target.closest('[data-step]');
+    const step = event.target.closest('[data-step][data-sound]');
     if (!step) return;
 
     if (isPlaying) {
@@ -164,7 +164,9 @@ stepGrid.addEventListener('click', (event) => {
         return;
     }
 
-    toggleGridStep(Number(step.dataset.step));
+    const sound = step.dataset.sound;
+    selectSound(sound);
+    toggleGridStep(Number(step.dataset.step), sound);
 });
 
 composer.addEventListener('submit', (event) => {
@@ -203,7 +205,7 @@ loopButton.addEventListener('click', () => {
 
 clearButton.addEventListener('click', () => {
     input.value = '';
-    gridPattern = Array(GRID_STEPS).fill(null);
+    gridPattern = Array.from({ length: GRID_STEPS }, () => []);
     renderGrid();
     persistWorkingState();
     input.focus();
@@ -261,6 +263,9 @@ function renderKitLabels() {
         const small = pad.querySelector('[data-pad-name]');
         if (small) small.textContent = name;
         pad.setAttribute('aria-label', label);
+
+        const laneName = stepGrid.querySelector(`[data-lane-name="${sound}"]`);
+        if (laneName) laneName.textContent = name;
     });
 
     selectedSoundLabel.textContent = padLabels[selectedSound];
@@ -334,72 +339,114 @@ function selectSound(sound) {
         pad.classList.toggle('is-selected', pad.dataset.key === sound);
     });
 
+    stepGrid.querySelectorAll('[data-lane-sound]').forEach((label) => {
+        label.classList.toggle('is-selected', label.dataset.laneSound === sound);
+    });
+
     renderGrid();
     renderChannelStrip();
 }
 
-function toggleGridStep(index) {
-    if (!Number.isInteger(index) || index < 0 || index >= GRID_STEPS) return;
+function toggleGridStep(index, sound) {
+    if (!Number.isInteger(index) || index < 0 || index >= GRID_STEPS || !sampleUrls[sound]) return;
 
-    gridPattern[index] = gridPattern[index] === selectedSound ? null : selectedSound;
+    gridPattern = Core.togglePatternSound(gridPattern, index, sound, sampleUrls, GRID_STEPS);
     renderGrid();
     syncInputFromGrid();
     persistWorkingState();
-    playbackStatus.textContent = gridPattern[index] ? `Passo ${index + 1} definido` : `Passo ${index + 1} limpo`;
+
+    const active = gridPattern[index].includes(sound);
+    playbackStatus.textContent = active
+        ? `${padLabels[sound]} · passo ${index + 1} ativo`
+        : `${padLabels[sound]} · passo ${index + 1} removido`;
 }
 
 function buildGrid() {
     stepGrid.innerHTML = '';
 
-    for (let index = 0; index < GRID_STEPS; index += 1) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'step-button';
-        button.dataset.step = String(index);
+    Object.keys(sampleUrls).forEach((sound) => {
+        const row = document.createElement('div');
+        row.className = 'lane-row';
+        row.dataset.lane = sound;
 
-        const number = document.createElement('span');
-        number.className = 'step-button__number';
-        number.textContent = String(index + 1).padStart(2, '0');
+        const label = document.createElement('button');
+        label.type = 'button';
+        label.className = 'lane-label';
+        label.dataset.laneSound = sound;
+        label.addEventListener('click', () => selectSound(sound));
 
-        const value = document.createElement('span');
-        value.className = 'step-button__value';
-        value.textContent = '·';
+        const key = document.createElement('span');
+        key.className = 'lane-label__key';
+        key.textContent = soundToKey(sound).toUpperCase();
 
-        button.append(number, value);
-        stepGrid.appendChild(button);
-    }
+        const name = document.createElement('span');
+        name.className = 'lane-label__name';
+        name.dataset.laneName = sound;
+        name.textContent = padLabels[sound].split(' · ')[0];
+
+        label.append(key, name);
+        row.appendChild(label);
+
+        for (let index = 0; index < GRID_STEPS; index += 1) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'step-button';
+            button.dataset.step = String(index);
+            button.dataset.sound = sound;
+            button.setAttribute('aria-pressed', 'false');
+
+            const number = document.createElement('span');
+            number.className = 'step-button__number';
+            number.textContent = String(index + 1).padStart(2, '0');
+
+            const pulse = document.createElement('span');
+            pulse.className = 'step-button__value';
+            pulse.textContent = '·';
+
+            button.append(number, pulse);
+            row.appendChild(button);
+        }
+
+        stepGrid.appendChild(row);
+    });
 }
 
 function renderGrid() {
-    const steps = stepGrid.querySelectorAll('[data-step]');
-
-    steps.forEach((button, index) => {
-        const sound = gridPattern[index];
+    stepGrid.querySelectorAll('[data-step][data-sound]').forEach((button) => {
+        const index = Number(button.dataset.step);
+        const sound = button.dataset.sound;
+        const active = gridPattern[index]?.includes(sound);
         const value = button.querySelector('.step-button__value');
 
-        button.classList.toggle('is-filled', Boolean(sound));
-        button.dataset.sound = sound || '';
-        button.setAttribute('aria-pressed', String(Boolean(sound)));
-        value.textContent = sound ? soundToKey(sound).toUpperCase() : '·';
-
-        const currentValue = sound ? padLabels[sound] : 'pausa';
-        const selectedValue = padLabels[selectedSound];
+        button.classList.toggle('is-filled', Boolean(active));
+        button.setAttribute('aria-pressed', String(Boolean(active)));
+        value.textContent = active ? '●' : '·';
         button.setAttribute(
             'aria-label',
-            `Passo ${index + 1}: ${currentValue}. Clique para ${sound === selectedSound ? 'remover' : `definir ${selectedValue}`}.`
+            `${padLabels[sound]}, passo ${index + 1}: ${active ? 'ativo, clique para remover' : 'vazio, clique para adicionar'}.`
         );
     });
 }
 
 function syncGridFromInput() {
     const parsed = parsePattern(input.value);
-    gridPattern = Array.from({ length: GRID_STEPS }, (_, index) => parsed[index] ?? null);
+    gridPattern = normalizePattern(parsed);
     renderGrid();
 }
 
 function syncInputFromGrid() {
-    const serialized = gridPattern.map(soundToKey).join('').replace(/-+$/, '');
+    const serialized = Core.serializeMonophonicPattern(gridPattern);
+
+    if (serialized === null) {
+        input.value = '';
+        input.placeholder = 'pattern polifônico · use o grid';
+        input.dataset.polyphonic = 'true';
+        return;
+    }
+
     input.value = serialized;
+    input.placeholder = 'qwe-asd-zxc';
+    delete input.dataset.polyphonic;
 }
 
 function setSwing(value) {
@@ -501,7 +548,7 @@ function saveActiveSlot() {
     if (isPlaying) return;
 
     savedSlots[activeSlot] = {
-        pattern: gridPattern.slice(),
+        pattern: gridPattern.map((step) => step.slice()),
         bpm: Number(tempo.value)
     };
     persistWorkingState();
@@ -528,7 +575,7 @@ function renderMemory() {
 function loadDemoPattern() {
     if (isPlaying) return;
 
-    gridPattern = DEMO_PATTERN.slice();
+    gridPattern = DEMO_PATTERN.map((step) => step.slice());
     setTempo(112);
     renderGrid();
     syncInputFromGrid();
@@ -564,7 +611,7 @@ function registerTempoTap() {
 function buildPortableState() {
     return {
         version: 1,
-        pattern: gridPattern.slice(),
+        pattern: gridPattern.map((step) => step.slice()),
         bpm: Number(tempo.value),
         swing: swingAmount,
         kit: activeKitId,
@@ -795,12 +842,12 @@ async function playSound(sound) {
 async function playSequence(pattern) {
     stopSequence({ announce: false });
 
-    if (!pattern.some(Boolean)) {
+    if (!pattern.some((step) => Array.isArray(step) && step.length > 0)) {
         playbackStatus.textContent = 'Adicione uma batida';
         return;
     }
 
-    currentPattern = pattern.slice(0, GRID_STEPS);
+    currentPattern = normalizePattern(pattern).map((step) => step.slice());
     currentStep = 0;
     isPlaying = true;
     machine.classList.add('is-playing');
@@ -829,11 +876,11 @@ function scheduleAhead() {
 
     while (isPlaying && nextStepTime < audioEngine.currentTime + SCHEDULE_AHEAD_SECONDS) {
         const stepIndex = currentStep;
-        const token = currentPattern[stepIndex];
+        const sounds = currentPattern[stepIndex];
 
         const scheduledTime = nextStepTime + swingOffsetSeconds(stepIndex);
-        if (token) audioEngine.playAt(token, scheduledTime);
-        scheduleVisualStep(stepIndex, token, scheduledTime);
+        sounds.forEach((sound) => audioEngine.playAt(sound, scheduledTime));
+        scheduleVisualStep(stepIndex, sounds, scheduledTime);
 
         nextStepTime += stepDurationSeconds();
         currentStep += 1;
@@ -853,13 +900,13 @@ function scheduleAhead() {
     }
 }
 
-function scheduleVisualStep(stepIndex, token, scheduledTime) {
+function scheduleVisualStep(stepIndex, sounds, scheduledTime) {
     const delay = Math.max(0, (scheduledTime - audioEngine.currentTime) * 1000);
     trackTimeout(() => {
         if (!isPlaying) return;
         activateStep(stepIndex);
         playbackStatus.textContent = `Passo ${stepIndex + 1}/${currentPattern.length}`;
-        if (token) flashPad(token);
+        sounds.forEach(flashPad);
     }, delay);
 }
 
@@ -868,16 +915,16 @@ function playFallbackCycle() {
 
     const interval = stepDurationSeconds() * 1000;
 
-    currentPattern.forEach((token, index) => {
+    currentPattern.forEach((sounds, index) => {
         trackTimeout(() => {
             if (!isPlaying) return;
             activateStep(index);
             playbackStatus.textContent = `Passo ${index + 1}/${currentPattern.length}`;
 
-            if (token) {
-                flashPad(token);
-                playFallbackSound(token);
-            }
+            sounds.forEach((sound) => {
+                flashPad(sound);
+                playFallbackSound(sound);
+            });
         }, index * interval + swingOffsetSeconds(index) * 1000);
     });
 
@@ -902,8 +949,9 @@ function activateStep(index) {
         step.classList.remove('is-current');
     });
 
-    const current = stepGrid.querySelector(`[data-step="${index}"]`);
-    if (current) current.classList.add('is-current');
+    stepGrid.querySelectorAll(`[data-step="${index}"]`).forEach((current) => {
+        current.classList.add('is-current');
+    });
 }
 
 function flashPad(sound) {

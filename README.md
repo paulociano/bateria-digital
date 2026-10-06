@@ -31,7 +31,7 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - 9 pads de bateria interativos
 - execução por clique ou teclado
 - samples de áudio individuais
-- sequenciador visual de 16 passos com edição direta
+- sequenciador polifônico de 9 lanes × 16 passos com edição direta
 - sequenciador textual sincronizado como atalho
 - controle de velocidade entre 70 e 180 BPM
 - feedback visual ao pressionar cada pad
@@ -386,3 +386,22 @@ A interface possui gates estáticos para:
 O workflow de testes roda em pull requests e também após pushes na `main`.
 
 A auditoria em navegador real continua necessária para métricas de Lighthouse/Core Web Vitals, navegação por teclado completa e inspeção auditiva da Web Audio API.
+
+
+## Sequenciador polifônico por lanes
+
+O grid principal agora possui **9 linhas × 16 colunas**:
+
+- cada linha representa um dos nove pads/instrumentos;
+- cada coluna representa uma semicolcheia;
+- múltiplas linhas podem ficar ativas na mesma coluna;
+- todos os sons ativos em um step são agendados para o mesmo instante;
+- o playhead percorre a coluna inteira.
+
+Patterns antigos continuam compatíveis. O app migra automaticamente o formato legado `som | pausa` para o novo formato polifônico `som[]` por step.
+
+### Quick Pattern
+
+O campo textual continua disponível como atalho rápido, mas é deliberadamente **monofônico**. Ao editar o texto, ele substitui o pattern inteiro por uma sequência com no máximo um som por step.
+
+Quando o grid possui dois ou mais sons no mesmo step, o campo textual fica vazio e indica que o pattern é polifônico, evitando representar incorretamente o groove.

@@ -29,7 +29,7 @@ const SCHEDULE_AHEAD_SECONDS = 0.12;
 
 let audioMode = 'pending';
 let audioReadyPromise = null;
-let sequenceTimers = [];
+const sequenceTimers = new Set();
 let schedulerId = null;
 let finishTimer = null;
 let loopEnabled = false;
@@ -229,14 +229,12 @@ function scheduleAhead() {
 
 function scheduleVisualStep(stepIndex, token, scheduledTime) {
     const delay = Math.max(0, (scheduledTime - audioEngine.currentTime) * 1000);
-    const timer = window.setTimeout(() => {
+    trackTimeout(() => {
         if (!isPlaying) return;
         activateStep(stepIndex);
         playbackStatus.textContent = `Passo ${stepIndex + 1}/${currentPattern.length}`;
         if (token) flashPad(token);
     }, delay);
-
-    sequenceTimers.push(timer);
 }
 
 function playFallbackCycle() {
@@ -245,7 +243,7 @@ function playFallbackCycle() {
     const interval = stepDurationSeconds() * 1000;
 
     currentPattern.forEach((token, index) => {
-        const timer = window.setTimeout(() => {
+        trackTimeout(() => {
             if (!isPlaying) return;
             activateStep(index);
             playbackStatus.textContent = `Passo ${index + 1}/${currentPattern.length}`;
@@ -255,23 +253,18 @@ function playFallbackCycle() {
                 playFallbackSound(token);
             }
         }, index * interval);
-
-        sequenceTimers.push(timer);
     });
 
-    const cycleTimer = window.setTimeout(() => {
+    trackTimeout(() => {
         if (!isPlaying) return;
 
         if (loopEnabled) {
-            sequenceTimers = [];
             playFallbackCycle();
             return;
         }
 
         finishSequence();
     }, currentPattern.length * interval);
-
-    sequenceTimers.push(cycleTimer);
 }
 
 function stepDurationSeconds() {
@@ -317,9 +310,19 @@ function stopScheduler() {
     }
 }
 
+function trackTimeout(callback, delay) {
+    const timer = window.setTimeout(() => {
+        sequenceTimers.delete(timer);
+        callback();
+    }, delay);
+
+    sequenceTimers.add(timer);
+    return timer;
+}
+
 function clearPlaybackTimers() {
     sequenceTimers.forEach((timer) => window.clearTimeout(timer));
-    sequenceTimers = [];
+    sequenceTimers.clear();
 
     if (finishTimer !== null) {
         window.clearTimeout(finishTimer);

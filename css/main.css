@@ -355,7 +355,8 @@ footer strong { color: #b5b3ab; font-weight: 600; }
     color: #fff;
 }
 
-.grid-play:active { transform: translateY(1px); }
+.grid-play:active:not(:disabled) { transform: translateY(1px); }
+.grid-play:disabled, .play:disabled { opacity: .42; cursor: not-allowed; }
 .grid-play svg { width: 13px; fill: currentColor; }
 
 .step-sequencer__selection {
@@ -401,9 +402,13 @@ footer strong { color: #b5b3ab; font-weight: 600; }
     transition: transform .08s, border-color .12s, background .12s, color .12s, box-shadow .12s;
 }
 
-.step-button:hover {
+.step-button:hover:not(:disabled) {
     border-color: rgba(255,255,255,.2);
     color: #a5a39b;
+}
+
+.step-button:disabled {
+    cursor: default;
 }
 
 .step-button.is-filled {

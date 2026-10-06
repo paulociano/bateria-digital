@@ -1,4 +1,5 @@
 const Core = window.BateriaCore;
+const Core = window.BateriaCore;
 const validKeys = new Set(['q', 'w', 'e', 'a', 's', 'd', 'z', 'x', 'c']);
 const KITS = {
     original: {

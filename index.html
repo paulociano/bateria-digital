@@ -3,127 +3,214 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#10100f">
+    <meta name="theme-color" content="#090b10">
+    <meta name="description" content="Bateria Digital: drum machine no navegador com pads, sequenciador de 16 passos, BPM e Web Audio.">
     <title>Bateria Digital — PH</title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <div class="ambient ambient--one" aria-hidden="true"></div>
-    <div class="ambient ambient--two" aria-hidden="true"></div>
+    <div class="app-glow app-glow--warm" aria-hidden="true"></div>
+    <div class="app-glow app-glow--cool" aria-hidden="true"></div>
 
     <header class="topbar">
         <a class="brand" href="#studio" aria-label="Bateria Digital — início">
-            <span class="brand-mark">PH</span>
-            <span>Bateria <strong>Digital</strong></span>
+            <span class="brand-mark" aria-hidden="true"><span>PH</span></span>
+            <span class="brand-copy">
+                <strong>Bateria Digital</strong>
+                <small>Browser groovebox</small>
+            </span>
         </a>
-        <p class="status"><span></span> Studio online</p>
+
+        <div class="topbar-meta">
+            <span class="topbar-version">BD/16</span>
+            <p class="status"><span aria-hidden="true"></span> Studio online</p>
+        </div>
     </header>
 
-    <main id="studio" class="studio">
-        <section class="intro" aria-labelledby="page-title">
-            <p class="eyebrow">Crie. Toque. Repita.</p>
-            <h1 id="page-title">Seu ritmo começa <em>aqui.</em></h1>
-            <p class="subtitle">Toque livremente nos pads ou transforme uma sequência curta em um loop. Sem cadastro, sem configuração.</p>
-
-            <div class="shortcut" aria-label="Atalhos de teclado">
-                <span>Teclado</span>
-                <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd>
-                <span>·</span>
-                <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
-                <span>·</span>
-                <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd>
+    <main id="studio" class="studio-shell">
+        <section class="hero" aria-labelledby="page-title">
+            <div class="hero-copy">
+                <p class="eyebrow">Performance instrument / 01</p>
+                <h1 id="page-title">Construa o groove.<br><em>Toque o momento.</em></h1>
+                <p class="subtitle">Uma drum machine direta no navegador. Toque os pads, desenhe 16 passos e deixe o loop trabalhar.</p>
             </div>
-            <p class="touch-hint">Toque diretamente nos pads para começar.</p>
+
+            <div class="hero-guide">
+                <div class="guide-block">
+                    <span class="guide-index">A</span>
+                    <div>
+                        <strong>Toque</strong>
+                        <p>Use QWE / ASD / ZXC ou toque nos pads.</p>
+                    </div>
+                </div>
+                <div class="guide-block">
+                    <span class="guide-index">B</span>
+                    <div>
+                        <strong>Selecione</strong>
+                        <p>O último pad tocado vira o som ativo do sequenciador.</p>
+                    </div>
+                </div>
+                <div class="guide-block">
+                    <span class="guide-index">C</span>
+                    <div>
+                        <strong>Monte</strong>
+                        <p>Marque os 16 passos e ajuste o BPM.</p>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <section class="machine" aria-label="Bateria digital">
-            <div class="machine-head">
-                <div>
-                    <p class="machine-label">Drum pad</p>
-                    <p class="machine-model">BD—09</p>
+        <section class="instrument" aria-label="Bateria digital">
+            <header class="instrument-head">
+                <div class="instrument-id">
+                    <span class="instrument-kicker">Digital rhythm instrument</span>
+                    <div>
+                        <h2>BD—16</h2>
+                        <span class="instrument-chip">Web Audio</span>
+                    </div>
                 </div>
+
                 <div class="machine-status">
                     <span class="machine-status__dot" aria-hidden="true"></span>
-                    <span id="playback-status" role="status" aria-live="polite">Pronto</span>
+                    <div>
+                        <small>Status</small>
+                        <strong id="playback-status" role="status" aria-live="polite">Pronto</strong>
+                    </div>
                 </div>
-            </div>
+            </header>
 
-            <div class="controls" aria-label="Controles de reprodução">
+            <section class="transport-panel" aria-label="Controles de reprodução">
                 <div class="tempo">
                     <div class="control-heading">
-                        <label for="tempo">Velocidade</label>
+                        <div>
+                            <span class="control-overline">Tempo</span>
+                            <label for="tempo">Velocidade</label>
+                        </div>
                         <output id="tempo-value" for="tempo">120 BPM</output>
                     </div>
                     <input type="range" id="tempo" min="70" max="180" value="120" step="1" aria-valuetext="120 BPM">
+                    <div class="tempo-scale" aria-hidden="true"><span>70</span><span>120</span><span>180</span></div>
                 </div>
 
                 <div class="transport" aria-label="Transporte">
                     <button class="transport-button transport-button--loop" id="loop" type="button" aria-pressed="false">
-                        Loop
+                        <span class="transport-icon" aria-hidden="true">∞</span>
+                        <span>Loop</span>
                     </button>
-                    <button class="transport-button" id="stop" type="button" disabled>
-                        Parar
+                    <button class="transport-button transport-button--stop" id="stop" type="button" disabled>
+                        <span class="transport-icon" aria-hidden="true">■</span>
+                        <span>Parar</span>
                     </button>
                     <button class="transport-button transport-button--clear" id="clear" type="button">
-                        Limpar
+                        <span class="transport-icon" aria-hidden="true">×</span>
+                        <span>Limpar</span>
                     </button>
                 </div>
-            </div>
-
-            <div class="keys" aria-label="Pads de bateria">
-                <button type="button" data-key="keyq" class="key key--coral" aria-label="Pad 01, tecla Q"><span>Q</span><small>PAD 01</small></button>
-                <button type="button" data-key="keyw" class="key key--gold" aria-label="Pad 02, tecla W"><span>W</span><small>PAD 02</small></button>
-                <button type="button" data-key="keye" class="key key--lime" aria-label="Pad 03, tecla E"><span>E</span><small>PAD 03</small></button>
-                <button type="button" data-key="keya" class="key key--violet" aria-label="Pad 04, tecla A"><span>A</span><small>PAD 04</small></button>
-                <button type="button" data-key="keys" class="key key--blue" aria-label="Pad 05, tecla S"><span>S</span><small>PAD 05</small></button>
-                <button type="button" data-key="keyd" class="key key--pink" aria-label="Pad 06, tecla D"><span>D</span><small>PAD 06</small></button>
-                <button type="button" data-key="keyz" class="key key--cyan" aria-label="Pad 07, tecla Z"><span>Z</span><small>PAD 07</small></button>
-                <button type="button" data-key="keyx" class="key key--orange" aria-label="Pad 08, tecla X"><span>X</span><small>PAD 08</small></button>
-                <button type="button" data-key="keyc" class="key key--green" aria-label="Pad 09, tecla C"><span>C</span><small>PAD 09</small></button>
-            </div>
-
-            <section class="step-sequencer" aria-labelledby="step-sequencer-title">
-                <div class="step-sequencer__head">
-                    <div>
-                        <p class="step-sequencer__eyebrow">Pattern</p>
-                        <h2 id="step-sequencer-title">Sequenciador 16 passos</h2>
-                    </div>
-                    <button class="grid-play" id="grid-play" type="button">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.55.83l9.3-6.2a1 1 0 0 0 0-1.66l-9.3-6.2A1 1 0 0 0 8 5.8Z"/></svg>
-                        Tocar pattern
-                    </button>
-                </div>
-
-                <div class="step-sequencer__selection" aria-live="polite">
-                    <span>Som selecionado</span>
-                    <strong id="selected-sound">Pad 01 · Q</strong>
-                </div>
-
-                <div class="step-grid" id="step-grid" role="group" aria-label="16 passos do sequenciador" aria-describedby="step-help"></div>
-                <p class="step-help" id="step-help">Escolha um pad e toque em um passo para adicionar ou substituir o som. Toque novamente no mesmo passo para removê-lo.</p>
             </section>
 
-            <form class="composer" id="composer">
-                <div class="composer-heading">
-                    <label for="input">Sequenciador rápido</label>
-                    <span>atalho para 16 passos</span>
-                </div>
-                <div class="composer-row">
-                    <div class="input-shell">
-                        <span aria-hidden="true">01</span>
-                        <input type="text" id="input" maxlength="16" autocomplete="off" spellcheck="false" placeholder="qwe-asd-zxc" aria-describedby="input-help">
+            <div class="instrument-body">
+                <section class="pad-bank" aria-labelledby="pads-title">
+                    <div class="section-heading">
+                        <div>
+                            <span class="section-number">01</span>
+                            <div>
+                                <p class="section-kicker">Performance</p>
+                                <h3 id="pads-title">Pads</h3>
+                            </div>
+                        </div>
+                        <p>Toque para ouvir e selecionar</p>
                     </div>
-                    <button class="play" type="submit" aria-label="Tocar sequência">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.55.83l9.3-6.2a1 1 0 0 0 0-1.66l-9.3-6.2A1 1 0 0 0 8 5.8Z"/></svg>
-                        Tocar
-                    </button>
-                </div>
-                <p id="input-help">Use Q W E · A S D · Z X C. Espaço, ponto ou hífen criam pausas. O texto e o grid ficam sincronizados. Pressione Esc para parar.</p>
-            </form>
+
+                    <div class="keys" aria-label="Pads de bateria">
+                        <button type="button" data-key="keyq" class="key key--coral" aria-label="Pad 01, tecla Q">
+                            <span class="key-code">Q</span><small>PAD 01</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keyw" class="key key--gold" aria-label="Pad 02, tecla W">
+                            <span class="key-code">W</span><small>PAD 02</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keye" class="key key--lime" aria-label="Pad 03, tecla E">
+                            <span class="key-code">E</span><small>PAD 03</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keya" class="key key--violet" aria-label="Pad 04, tecla A">
+                            <span class="key-code">A</span><small>PAD 04</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keys" class="key key--blue" aria-label="Pad 05, tecla S">
+                            <span class="key-code">S</span><small>PAD 05</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keyd" class="key key--pink" aria-label="Pad 06, tecla D">
+                            <span class="key-code">D</span><small>PAD 06</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keyz" class="key key--cyan" aria-label="Pad 07, tecla Z">
+                            <span class="key-code">Z</span><small>PAD 07</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keyx" class="key key--orange" aria-label="Pad 08, tecla X">
+                            <span class="key-code">X</span><small>PAD 08</small><i aria-hidden="true"></i>
+                        </button>
+                        <button type="button" data-key="keyc" class="key key--green" aria-label="Pad 09, tecla C">
+                            <span class="key-code">C</span><small>PAD 09</small><i aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="sequence-bank" aria-labelledby="step-sequencer-title">
+                    <div class="section-heading">
+                        <div>
+                            <span class="section-number">02</span>
+                            <div>
+                                <p class="section-kicker">Pattern</p>
+                                <h3 id="step-sequencer-title">16 passos</h3>
+                            </div>
+                        </div>
+                        <button class="grid-play" id="grid-play" type="button">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.55.83l9.3-6.2a1 1 0 0 0 0-1.66l-9.3-6.2A1 1 0 0 0 8 5.8Z"/></svg>
+                            Tocar pattern
+                        </button>
+                    </div>
+
+                    <div class="selected-sound-card" aria-live="polite">
+                        <span class="selected-sound-dot" aria-hidden="true"></span>
+                        <div>
+                            <small>Som selecionado</small>
+                            <strong id="selected-sound">Pad 01 · Q</strong>
+                        </div>
+                        <span class="selected-sound-hint">clique nos passos</span>
+                    </div>
+
+                    <div class="step-groups">
+                        <span>01–04</span><span>05–08</span><span>09–12</span><span>13–16</span>
+                    </div>
+                    <div class="step-grid" id="step-grid" role="group" aria-label="16 passos do sequenciador" aria-describedby="step-help"></div>
+                    <p class="step-help" id="step-help">Escolha um pad e toque em um passo para adicionar ou substituir o som. Toque novamente no mesmo passo para removê-lo.</p>
+
+                    <form class="composer" id="composer">
+                        <div class="composer-heading">
+                            <div>
+                                <span class="control-overline">Quick pattern</span>
+                                <label for="input">Entrada rápida</label>
+                            </div>
+                            <span>16 caracteres</span>
+                        </div>
+                        <div class="composer-row">
+                            <div class="input-shell">
+                                <span aria-hidden="true">TXT</span>
+                                <input type="text" id="input" maxlength="16" autocomplete="off" spellcheck="false" placeholder="qwe-asd-zxc" aria-describedby="input-help">
+                            </div>
+                            <button class="play" type="submit" aria-label="Tocar sequência">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.8v12.4a1 1 0 0 0 1.55.83l9.3-6.2a1 1 0 0 0 0-1.66l-9.3-6.2A1 1 0 0 0 8 5.8Z"/></svg>
+                                Tocar
+                            </button>
+                        </div>
+                        <p id="input-help">Q W E · A S D · Z X C. Espaço, ponto ou hífen criam pausas. Pressione Esc para parar.</p>
+                    </form>
+                </section>
+            </div>
         </section>
     </main>
 
-    <footer><p>Desenvolvido por <strong>Paulo Henrique</strong></p><p>© 2026</p></footer>
+    <footer>
+        <p><strong>PH / Bateria Digital</strong><span>Performance instrument for the browser</span></p>
+        <p>© 2026</p>
+    </footer>
 
     <audio id="s_keyq" src="music/keyq.wav" preload="none"></audio>
     <audio id="s_keyw" src="music/keyw.wav" preload="none"></audio>

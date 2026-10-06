@@ -163,13 +163,15 @@ Concentra o comportamento da aplicação:
 
 Responsável pela identidade visual e responsividade.
 
-A interface utiliza uma estética escura inspirada em equipamentos musicais, com:
+A interface segue a direção **performance instrument** documentada em `DESIGN.md`, combinando linguagem de hardware musical com UI contemporânea. Principais elementos:
 
 - pads coloridos;
 - painel central semelhante a uma drum machine;
 - tipografia Manrope e DM Mono;
 - feedback visual ao tocar;
-- iluminação ambiente;
+- iluminação ambiente contida;
+- hierarquia clara entre transporte, pads e sequenciador;
+- agrupamento visual dos 16 passos em blocos de quatro;
 - layout adaptado para desktop e mobile.
 
 ## Fluxo de execução

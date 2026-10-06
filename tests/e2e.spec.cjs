@@ -112,7 +112,14 @@ test('invalid shared hash does not break the application', async ({ page }) => {
 });
 
 test.describe('mobile layout', () => {
-    test.use({ ...devices['iPhone 13'] });
+    const iphone = devices['iPhone 13'];
+    test.use({
+        viewport: iphone.viewport,
+        userAgent: iphone.userAgent,
+        deviceScaleFactor: iphone.deviceScaleFactor,
+        isMobile: iphone.isMobile,
+        hasTouch: iphone.hasTouch
+    });
 
     test('keeps critical controls usable without horizontal overflow', async ({ page }) => {
         await page.goto(baseURL);

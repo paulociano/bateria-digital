@@ -108,3 +108,12 @@ Evitar motion decorativo contínuo. Respeitar `prefers-reduced-motion`.
 - Kits com metadata confiável mostram o nome real do instrumento no pad, no mixer e nos rótulos acessíveis.
 - Trocar de kit preserva pattern, BPM, Swing e estados de mixer.
 - Cores dos pads pertencem à posição/atalho e não mudam entre kits, para preservar memória motora.
+
+
+## Share and record
+
+- Compartilhar e Gravar vivem na área de utilidades, não no transporte primário.
+- Compartilhar deve ser backend-free e refletir o working pattern atual.
+- Gravação é um estado explícito: o botão muda para Finalizar e recebe indicador coral pulsante.
+- Gravação nunca deve remover o acesso ao próprio botão de finalizar durante playback.
+- Export deve refletir o master real da Web Audio engine, incluindo mixer, Swing, kit e performance manual.

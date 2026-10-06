@@ -34,7 +34,8 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - sequenciador textual
 - controle de velocidade entre 70 e 180 BPM
 - feedback visual ao pressionar cada pad
-- feedback de progresso durante a reprodução da sequência\n- engine baseada em Web Audio API, com fallback para HTMLAudio
+- feedback de progresso durante a reprodução da sequência
+- engine baseada em Web Audio API, com fallback para HTMLAudio
 - indicação de estado durante a reprodução
 - controles separados para loop, interrupção e limpeza da sequência
 - layout responsivo
@@ -253,4 +254,4 @@ Sem cadastro, sem dependências e sem configuração.
 ---
 
 Desenvolvido por **Paulo Henrique**.
-\n
+

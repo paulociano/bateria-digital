@@ -81,3 +81,12 @@ Evitar motion decorativo contínuo. Respeitar `prefers-reduced-motion`.
 - cores dos pads usadas apenas por decoração;
 - adicionar features novas durante mudanças puramente visuais;
 - quebrar IDs/hooks usados pelo JavaScript.
+
+
+## Product controls
+
+- Memória A/B/C/D vive entre transporte e corpo do instrumento.
+- Slot ativo usa o acento coral; slot com conteúdo recebe indicador discreto verde.
+- Salvar é explícito. Trocar para slot vazio não deve apagar o pattern atual.
+- Demo e Tap Tempo são utilidades secundárias e não competem visualmente com Play/Stop.
+- Persistência é local e silenciosa; feedback de salvar/carregar aparece no status do instrumento.

@@ -358,3 +358,15 @@ Nenhum dado é enviado para servidor. Ao abrir um link compartilhado, o estado c
 O botão **Gravar** captura o master da Web Audio engine usando `MediaRecorder`. Enquanto a gravação está ativa, pads e playback continuam funcionando normalmente. Ao finalizar, o navegador gera um arquivo de áudio no melhor formato suportado, priorizando Opus/WebM e Opus/Ogg.
 
 A gravação depende de Web Audio + MediaRecorder. Em navegadores sem esse suporte, o restante da drum machine continua funcionando, mas a exportação fica indisponível.
+
+## Testes e CI
+
+A lógica pura de parsing, normalização de pattern, estado de mixer e serialização de links compartilháveis vive em `js/core.js` e é coberta por testes nativos do Node:
+
+```bash
+node --test tests/*.test.cjs
+```
+
+O workflow `.github/workflows/test.yml` executa essa suíte em pull requests.
+
+Para reduzir trabalho na abertura da página, a Web Audio engine não decodifica os samples no carregamento inicial. O carregamento acontece na primeira interação que realmente precisa de áudio.

@@ -23,12 +23,43 @@
     }
 
     function normalizePattern(pattern, sampleUrls, gridSteps = 16) {
-        if (!Array.isArray(pattern)) return Array(gridSteps).fill(null);
+        if (!Array.isArray(pattern)) return Array.from({ length: gridSteps }, () => []);
 
         return Array.from({ length: gridSteps }, (_, index) => {
-            const sound = pattern[index];
-            return sound === null || sampleUrls?.[sound] ? sound ?? null : null;
+            const value = pattern[index];
+            const sounds = Array.isArray(value)
+                ? value
+                : (typeof value === 'string' ? [value] : []);
+
+            return [...new Set(sounds.filter((sound) => Boolean(sampleUrls?.[sound])))];
         });
+    }
+
+    function togglePatternSound(pattern, stepIndex, sound, sampleUrls, gridSteps = 16) {
+        const normalized = normalizePattern(pattern, sampleUrls, gridSteps);
+        if (!Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex >= gridSteps || !sampleUrls?.[sound]) {
+            return normalized;
+        }
+
+        const step = normalized[stepIndex];
+        normalized[stepIndex] = step.includes(sound)
+            ? step.filter((item) => item !== sound)
+            : [...step, sound];
+
+        return normalized;
+    }
+
+    function serializeMonophonicPattern(pattern) {
+        if (!Array.isArray(pattern)) return '';
+
+        const serialized = [];
+        for (const step of pattern) {
+            const sounds = Array.isArray(step) ? step : (typeof step === 'string' ? [step] : []);
+            if (sounds.length > 1) return null;
+            serialized.push(sounds[0] ? sounds[0].slice(-1) : '-');
+        }
+
+        return serialized.join('').replace(/-+$/, '');
     }
 
     function soundToKey(sound) {
@@ -86,6 +117,8 @@
     return {
         parsePattern,
         normalizePattern,
+        togglePatternSound,
+        serializeMonophonicPattern,
         soundToKey,
         normalizeChannelState,
         encodePortableState,

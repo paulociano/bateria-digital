@@ -165,11 +165,20 @@ Automated:
 - breakpoints principais;
 - touch targets;
 - font loading contract;
-- high contrast hook.
+- high contrast hook;
+- carregamento real da aplicação em Chromium;
+- edição do grid e sincronização com Quick Pattern;
+- persistência de working pattern/BPM;
+- save/load do slot A;
+- restauração de estado por URL compartilhada;
+- tolerância a hash compartilhado inválido;
+- overflow horizontal em desktop e viewport mobile;
+- screenshots de evidência desktop/mobile como artifact de CI.
 
 Still manual:
 - áudio real;
 - MediaRecorder/export;
+- comparação visual regression contra baseline aprovado;
 - timing perceptual de Swing;
 - keyboard traversal completo;
 - Safari/iOS;

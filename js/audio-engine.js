@@ -151,16 +151,23 @@
             ];
             const mimeType = preferredTypes.find((type) => MediaRecorder.isTypeSupported?.(type)) || '';
 
-            this.recordedChunks = [];
-            this.mediaRecorder = new MediaRecorder(
-                this.recordingDestination.stream,
-                mimeType ? { mimeType } : undefined
-            );
-            this.mediaRecorder.addEventListener('dataavailable', (event) => {
-                if (event.data?.size) this.recordedChunks.push(event.data);
-            });
-            this.mediaRecorder.start();
-            return true;
+            try {
+                this.recordedChunks = [];
+                this.mediaRecorder = new MediaRecorder(
+                    this.recordingDestination.stream,
+                    mimeType ? { mimeType } : undefined
+                );
+                this.mediaRecorder.addEventListener('dataavailable', (event) => {
+                    if (event.data?.size) this.recordedChunks.push(event.data);
+                });
+                this.mediaRecorder.start();
+                return true;
+            } catch (error) {
+                console.warn('Não foi possível iniciar o MediaRecorder.', error);
+                this.mediaRecorder = null;
+                this.recordedChunks = [];
+                return false;
+            }
         }
 
         stopRecording() {

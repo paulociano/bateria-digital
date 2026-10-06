@@ -34,7 +34,7 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - sequenciador textual
 - controle de velocidade entre 70 e 180 BPM
 - feedback visual ao pressionar cada pad
-- feedback de progresso durante a reprodução da sequência
+- feedback de progresso durante a reprodução da sequência\n- engine baseada em Web Audio API, com fallback para HTMLAudio
 - indicação de estado durante a reprodução
 - controles separados para loop, interrupção e limpeza da sequência
 - layout responsivo
@@ -80,7 +80,7 @@ qwe asd zxc
 
 Caracteres que não correspondem aos pads são ignorados.
 
-Ao clicar em **Tocar**, a sequência é executada na ordem digitada. O controle **Loop** repete a sequência, **Parar** interrompe sem apagar o texto e **Limpar** remove apenas o conteúdo do sequenciador.
+Ao clicar em **Tocar**, a sequência é executada na ordem digitada. Espaço, ponto (`.`) e hífen (`-`) representam pausas reais entre os sons. O controle **Loop** repete a sequência, **Parar** interrompe sem apagar o texto e **Limpar** remove apenas o conteúdo do sequenciador.
 
 ## Controle de BPM
 
@@ -253,3 +253,4 @@ Sem cadastro, sem dependências e sem configuração.
 ---
 
 Desenvolvido por **Paulo Henrique**.
+\n

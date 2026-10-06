@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap');
-
 :root {
     --bg: #090b10;
     --bg-raised: #0f1219;
@@ -116,7 +114,7 @@ body::before {
 
 .brand-copy { display: grid; gap: 2px; }
 .brand-copy strong { font-size: 13px; line-height: 1; letter-spacing: -.02em; }
-.brand-copy small { color: var(--muted-2); font: 500 8px DM Mono, monospace; text-transform: uppercase; letter-spacing: .12em; }
+.brand-copy small { color: var(--muted-2); font: 500 9px DM Mono, monospace; text-transform: uppercase; letter-spacing: .12em; }
 
 .topbar-meta { display: flex; align-items: center; gap: 18px; }
 .topbar-version {
@@ -124,7 +122,7 @@ body::before {
     border: 1px solid var(--line);
     border-radius: 7px;
     color: var(--muted-2);
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     letter-spacing: .08em;
 }
 .status {
@@ -265,7 +263,7 @@ body::before {
 }
 
 .instrument-id { display: grid; gap: 7px; }
-.instrument-kicker { color: var(--muted-2); font-size: 8px; }
+.instrument-kicker { color: var(--muted-2); font-size: 9px; }
 .instrument-id > div { display: flex; align-items: center; gap: 10px; }
 .instrument-id h2 { font-size: 24px; line-height: 1; letter-spacing: -.04em; }
 .instrument-chip {
@@ -274,7 +272,7 @@ body::before {
     border-radius: 999px;
     background: rgba(93,169,255,.08);
     color: #8ec3ff;
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .08em;
 }
@@ -300,7 +298,7 @@ body::before {
     display: block;
     margin-bottom: 2px;
     color: var(--muted-2);
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .1em;
 }
@@ -341,7 +339,7 @@ body::before {
     display: block;
     margin-bottom: 3px;
     color: var(--muted-2);
-    font-size: 7px;
+    font-size: 8px;
 }
 .control-heading label,
 .composer label {
@@ -383,7 +381,7 @@ body::before {
     display: flex;
     justify-content: space-between;
     color: #4e5663;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
 }
 
 .transport { display: flex; gap: 8px; }
@@ -458,12 +456,12 @@ body::before {
     border: 1px solid var(--line);
     border-radius: 9px;
     color: var(--muted-2);
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
 }
 .section-kicker {
     margin-bottom: 3px;
     color: var(--muted-2);
-    font-size: 7px;
+    font-size: 8px;
 }
 .section-heading h3 {
     font-size: 16px;
@@ -473,7 +471,7 @@ body::before {
 .section-heading > p {
     max-width: 160px;
     color: var(--muted-2);
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     line-height: 1.45;
     text-align: right;
     text-transform: uppercase;
@@ -530,7 +528,7 @@ body::before {
     left: 12px;
     bottom: 11px;
     color: rgba(255,255,255,.55);
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     letter-spacing: .09em;
 }
 .key i {
@@ -569,7 +567,7 @@ body::before {
 
 .grid-play,
 .play {
-    min-height: 42px;
+    min-height: 44px;
     padding: 0 15px;
     display: inline-flex;
     align-items: center;
@@ -616,7 +614,7 @@ body::before {
     display: block;
     margin-bottom: 3px;
     color: var(--muted-2);
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .1em;
 }
@@ -626,7 +624,7 @@ body::before {
 }
 .selected-sound-hint {
     color: #565f6d;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .08em;
 }
@@ -636,7 +634,7 @@ body::before {
     grid-template-columns: repeat(4, 1fr);
     margin-bottom: 7px;
     color: #4d5664;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-align: center;
 }
 
@@ -694,7 +692,7 @@ body::before {
     justify-self: start;
     color: currentColor;
     opacity: .55;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
 }
 .step-button__value {
     align-self: center;
@@ -734,7 +732,7 @@ body::before {
 }
 .composer-heading > span {
     color: #565f6d;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .08em;
 }
@@ -759,7 +757,7 @@ body::before {
     padding: 0 11px;
     color: #596270;
     border-right: 1px solid var(--line);
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
 }
 .composer input {
     min-width: 0;
@@ -778,7 +776,7 @@ body::before {
 .composer p {
     margin-top: 9px;
     color: #596270;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     line-height: 1.55;
     text-transform: uppercase;
     letter-spacing: .04em;
@@ -868,6 +866,15 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 
 @media (pointer: coarse) {
     .key:hover { filter: none; }
+
+    .slot-button,
+    .memory-action,
+    .utility-button,
+    .channel-toggle,
+    .grid-play,
+    .play {
+        min-height: 44px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -912,7 +919,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 
 .utility-heading > span {
     color: var(--muted-2);
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .08em;
 }
@@ -925,7 +932,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 .slot-button,
 .memory-action,
 .utility-button {
-    min-height: 38px;
+    min-height: 44px;
     border: 1px solid var(--line);
     border-radius: 10px;
     background: #10141c;
@@ -999,7 +1006,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 
 .utility-button small {
     color: #5d6673;
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .04em;
 }
@@ -1068,7 +1075,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 
 .channel-strip__head > span {
     color: var(--muted-2);
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .06em;
 }
@@ -1087,7 +1094,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
     gap: 7px 12px;
     align-items: center;
     color: var(--muted);
-    font: 500 8px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .05em;
 }
@@ -1123,7 +1130,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 
 .channel-toggle {
     min-width: 54px;
-    min-height: 38px;
+    min-height: 44px;
     padding: 0 10px;
     border: 1px solid var(--line);
     border-radius: 10px;
@@ -1240,7 +1247,7 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
 
 .kit-control > span {
     color: var(--muted-2);
-    font: 500 7px DM Mono, monospace;
+    font: 500 9px DM Mono, monospace;
     text-transform: uppercase;
     letter-spacing: .08em;
 }
@@ -1290,4 +1297,23 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
     box-shadow: 0 0 10px rgba(255,112,94,.55);
     animation: pulse .9s ease-in-out infinite;
     vertical-align: middle;
+}
+
+
+@media (prefers-contrast: more) {
+    :root {
+        --muted: #c0c7d1;
+        --muted-2: #9da7b4;
+        --line: rgba(255,255,255,.18);
+        --line-strong: rgba(255,255,255,.28);
+    }
+
+    .step-button,
+    .transport-button,
+    .utility-button,
+    .channel-toggle,
+    .slot-button,
+    .memory-action {
+        border-color: var(--line-strong);
+    }
 }

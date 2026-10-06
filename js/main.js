@@ -31,6 +31,7 @@ const clearButton = document.querySelector('#clear');
 const stopButton = document.querySelector('#stop');
 const loopButton = document.querySelector('#loop');
 const gridPlayButton = document.querySelector('#grid-play');
+const quickPlayButton = composer.querySelector('.play');
 const machine = document.querySelector('.machine');
 const playbackStatus = document.querySelector('#playback-status');
 const keys = document.querySelector('.keys');
@@ -130,8 +131,6 @@ loopButton.addEventListener('click', () => {
 });
 
 clearButton.addEventListener('click', () => {
-    if (isPlaying) stopSequence({ announce: false });
-
     input.value = '';
     gridPattern = Array(GRID_STEPS).fill(null);
     renderGrid();
@@ -284,7 +283,7 @@ async function playSequence(pattern) {
     isPlaying = true;
     machine.classList.add('is-playing');
     stopButton.disabled = false;
-    gridPlayButton.disabled = true;
+    setEditingDisabled(true);
     playbackStatus.textContent = 'Preparando áudio';
 
     const webAudioReady = await ensureAudio();
@@ -372,7 +371,7 @@ function playFallbackCycle() {
 }
 
 function stepDurationSeconds() {
-    return 60 / Number(tempo.value) / 2;
+    return 60 / Number(tempo.value) / 4;
 }
 
 function activateStep(index) {
@@ -440,12 +439,23 @@ function stopAllAudio() {
     });
 }
 
+function setEditingDisabled(disabled) {
+    input.disabled = disabled;
+    quickPlayButton.disabled = disabled;
+    gridPlayButton.disabled = disabled;
+    clearButton.disabled = disabled;
+
+    stepGrid.querySelectorAll('.step-button').forEach((step) => {
+        step.disabled = disabled;
+    });
+}
+
 function resetPlaybackState(status) {
     isPlaying = false;
     currentStep = 0;
     machine.classList.remove('is-playing');
     stopButton.disabled = true;
-    gridPlayButton.disabled = false;
+    setEditingDisabled(false);
     stepGrid.querySelectorAll('.step-button.is-current').forEach((step) => step.classList.remove('is-current'));
     playbackStatus.textContent = status;
 }

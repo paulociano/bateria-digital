@@ -108,6 +108,36 @@
                 </div>
             </section>
 
+            <section class="utility-panel" aria-label="Memória e utilidades">
+                <div class="pattern-memory">
+                    <div class="utility-heading">
+                        <div>
+                            <span class="control-overline">Memory</span>
+                            <strong>Patterns</strong>
+                        </div>
+                        <span id="active-slot">Slot A</span>
+                    </div>
+                    <div class="slot-row" role="group" aria-label="Slots de pattern">
+                        <button class="slot-button is-active" type="button" data-slot="A" aria-pressed="true">A</button>
+                        <button class="slot-button" type="button" data-slot="B" aria-pressed="false">B</button>
+                        <button class="slot-button" type="button" data-slot="C" aria-pressed="false">C</button>
+                        <button class="slot-button" type="button" data-slot="D" aria-pressed="false">D</button>
+                        <button class="memory-action" id="save-slot" type="button">Salvar</button>
+                    </div>
+                </div>
+
+                <div class="utility-actions">
+                    <button class="utility-button" id="demo-pattern" type="button">
+                        <span>Demo</span>
+                        <small>carregar groove</small>
+                    </button>
+                    <button class="utility-button utility-button--tap" id="tap-tempo" type="button">
+                        <span>Tap Tempo</span>
+                        <small>toque no pulso</small>
+                    </button>
+                </div>
+            </section>
+
             <div class="instrument-body">
                 <section class="pad-bank" aria-labelledby="pads-title">
                     <div class="section-heading">

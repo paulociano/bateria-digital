@@ -10,35 +10,63 @@ test.beforeEach(async ({ page }) => {
 test('loads the complete instrument shell without horizontal overflow', async ({ page }) => {
     await expect(page.getByRole('heading', { name: 'BD—16' })).toBeVisible();
     await expect(page.locator('[data-key]')).toHaveCount(9);
-    await expect(page.locator('.step-button')).toHaveCount(16);
+    await expect(page.locator('.lane-row')).toHaveCount(9);
+    await expect(page.locator('.step-button')).toHaveCount(144);
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     expect(overflow).toBe(false);
 });
 
-test('quick pattern updates the 16-step grid without requiring playback', async ({ page }) => {
+test('quick pattern replaces the grid with a monophonic 16-step pattern', async ({ page }) => {
     await page.locator('#input').fill('qw-e');
-    const values = page.locator('.step-button__value');
 
-    await expect(values.nth(0)).toHaveText('Q');
-    await expect(values.nth(1)).toHaveText('W');
-    await expect(values.nth(2)).toHaveText('·');
-    await expect(values.nth(3)).toHaveText('E');
+    await expect(page.locator('[data-sound="keyq"][data-step="0"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-sound="keyw"][data-step="1"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-sound="keye"][data-step="3"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-sound="keyq"][data-step="1"]')).toHaveAttribute('aria-pressed', 'false');
 });
 
-test('selecting a pad and editing a step updates the observable pattern state', async ({ page }) => {
-    await page.locator('[data-key="keyw"]').click();
-    await expect(page.locator('#selected-sound')).toContainText('W');
+test('lane editing allows simultaneous sounds on the same step', async ({ page }) => {
+    const kick = page.locator('[data-sound="keyq"][data-step="0"]');
+    const snare = page.locator('[data-sound="keyw"][data-step="0"]');
 
-    const firstStep = page.locator('.step-button').first();
-    await firstStep.click();
-    await expect(firstStep).toHaveAttribute('aria-pressed', 'true');
-    await expect(firstStep.locator('.step-button__value')).toHaveText('W');
-    await expect(page.locator('#input')).toHaveValue('w');
+    await kick.click();
+    await expect(kick).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#input')).toHaveValue('q');
 
-    await firstStep.click();
-    await expect(firstStep).toHaveAttribute('aria-pressed', 'false');
+    await snare.click();
+    await expect(kick).toHaveAttribute('aria-pressed', 'true');
+    await expect(snare).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#input')).toHaveValue('');
+    await expect(page.locator('#input')).toHaveAttribute('data-polyphonic', 'true');
+
+    await kick.click();
+    await expect(kick).toHaveAttribute('aria-pressed', 'false');
+    await expect(snare).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#input')).toHaveValue('w');
+});
+
+test('legacy monophonic localStorage state migrates into lane cells', async ({ page }) => {
+    await page.evaluate(() => {
+        localStorage.setItem('bateria-digital:state:v1', JSON.stringify({
+            version: 1,
+            activeSlot: 'A',
+            working: {
+                pattern: ['keyq', null, 'keyw'],
+                bpm: 120,
+                swing: 50,
+                kit: 'original',
+                channels: {}
+            },
+            slots: {}
+        }));
+    });
+
+    await page.reload();
+
+    await expect(page.locator('[data-sound="keyq"][data-step="0"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-sound="keyw"][data-step="2"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#input')).toHaveValue('q-w');
 });
 
 test('working pattern and BPM survive reload through localStorage', async ({ page }) => {
@@ -110,7 +138,7 @@ test('invalid shared hash does not break the application', async ({ page }) => {
     await page.goto('about:blank');
     await page.goto(`${baseURL}/#p=invalid-payload`);
     await expect(page.locator('#playback-status')).toHaveText('Link de pattern inválido');
-    await expect(page.locator('.step-button')).toHaveCount(16);
+    await expect(page.locator('.step-button')).toHaveCount(144);
 });
 
 test.describe('mobile layout', () => {
@@ -127,7 +155,7 @@ test.describe('mobile layout', () => {
         await page.goto(baseURL);
 
         await expect(page.locator('[data-key]')).toHaveCount(9);
-        await expect(page.locator('.step-button')).toHaveCount(16);
+        await expect(page.locator('.step-button')).toHaveCount(144);
         await expect(page.locator('#stop')).toBeVisible();
         await expect(page.locator('#record-audio')).toBeVisible();
 

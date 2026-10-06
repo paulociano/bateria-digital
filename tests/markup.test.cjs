@@ -31,8 +31,8 @@ test('motion and mobile breakpoints remain guarded', () => {
 });
 
 test('web fonts are requested from head without CSS @import', () => {
-    assert.match(html, /rel="preconnect" href="https://fonts.googleapis.com"/);
-    assert.match(html, /fonts.googleapis.com/css2/);
+    assert.match(html, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/);
+    assert.match(html, /fonts\.googleapis\.com\/css2/);
     assert.doesNotMatch(css, /@import\s+url\(/);
 });
 

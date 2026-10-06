@@ -23,6 +23,15 @@ const padLabels = {
 };
 
 const GRID_STEPS = 16;
+const STORAGE_KEY = 'bateria-digital:state:v1';
+const SLOT_NAMES = ['A', 'B', 'C', 'D'];
+const DEMO_PATTERN = [
+    'keyq', null, 'keys', null,
+    'keyq', 'keyw', 'keys', null,
+    'keyq', null, 'keys', 'keye',
+    'keyq', 'keyw', 'keys', null
+];
+
 const composer = document.querySelector('#composer');
 const input = document.querySelector('#input');
 const tempo = document.querySelector('#tempo');
@@ -37,6 +46,11 @@ const playbackStatus = document.querySelector('#playback-status');
 const keys = document.querySelector('.keys');
 const stepGrid = document.querySelector('#step-grid');
 const selectedSoundLabel = document.querySelector('#selected-sound');
+const slotButtons = [...document.querySelectorAll('[data-slot]')];
+const activeSlotLabel = document.querySelector('#active-slot');
+const saveSlotButton = document.querySelector('#save-slot');
+const demoPatternButton = document.querySelector('#demo-pattern');
+const tapTempoButton = document.querySelector('#tap-tempo');
 
 const audioEngine = new window.AudioEngine(sampleUrls);
 const LOOK_AHEAD_MS = 25;
@@ -54,6 +68,9 @@ let currentStep = 0;
 let nextStepTime = 0;
 let selectedSound = 'keyq';
 let gridPattern = Array(GRID_STEPS).fill(null);
+let activeSlot = 'A';
+let savedSlots = Object.fromEntries(SLOT_NAMES.map((slot) => [slot, null]));
+let tapTimes = [];
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isPlaying) {
@@ -113,9 +130,13 @@ gridPlayButton.addEventListener('click', () => {
 input.addEventListener('input', () => {
     if (isPlaying) return;
     syncGridFromInput();
+    persistWorkingState();
 });
 
-tempo.addEventListener('input', updateTempo);
+tempo.addEventListener('input', () => {
+    updateTempo();
+    persistWorkingState();
+});
 
 stopButton.addEventListener('click', () => {
     stopSequence();
@@ -134,9 +155,18 @@ clearButton.addEventListener('click', () => {
     input.value = '';
     gridPattern = Array(GRID_STEPS).fill(null);
     renderGrid();
+    persistWorkingState();
     input.focus();
     playbackStatus.textContent = 'Pattern limpo';
 });
+
+slotButtons.forEach((button) => {
+    button.addEventListener('click', () => selectSlot(button.dataset.slot));
+});
+
+saveSlotButton.addEventListener('click', saveActiveSlot);
+demoPatternButton.addEventListener('click', loadDemoPattern);
+tapTempoButton.addEventListener('click', registerTempoTap);
 
 function parsePattern(value) {
     const pattern = [];
@@ -153,6 +183,15 @@ function parsePattern(value) {
     });
 
     return pattern.slice(0, GRID_STEPS);
+}
+
+function normalizePattern(pattern) {
+    if (!Array.isArray(pattern)) return Array(GRID_STEPS).fill(null);
+
+    return Array.from({ length: GRID_STEPS }, (_, index) => {
+        const sound = pattern[index];
+        return sound === null || sampleUrls[sound] ? sound ?? null : null;
+    });
 }
 
 function soundToKey(sound) {
@@ -178,6 +217,7 @@ function toggleGridStep(index) {
     gridPattern[index] = gridPattern[index] === selectedSound ? null : selectedSound;
     renderGrid();
     syncInputFromGrid();
+    persistWorkingState();
     playbackStatus.textContent = gridPattern[index] ? `Passo ${index + 1} definido` : `Passo ${index + 1} limpo`;
 }
 
@@ -235,13 +275,157 @@ function syncInputFromGrid() {
     input.value = serialized;
 }
 
+function setTempo(value) {
+    const numeric = Math.round(Number(value));
+    const clamped = Math.min(Number(tempo.max), Math.max(Number(tempo.min), numeric || 120));
+    tempo.value = String(clamped);
+    updateTempo();
+}
+
 function updateTempo() {
     const percentage = ((tempo.value - tempo.min) / (tempo.max - tempo.min)) * 100;
     const label = `${tempo.value} BPM`;
 
     tempoValue.value = label;
     tempo.setAttribute('aria-valuetext', label);
-    tempo.style.background = `linear-gradient(90deg, #ff806d ${percentage}%, #464642 ${percentage}%)`;
+    tempo.style.background = `linear-gradient(90deg, #ff705e ${percentage}%, #303744 ${percentage}%)`;
+}
+
+function selectSlot(slot) {
+    if (!SLOT_NAMES.includes(slot) || isPlaying) return;
+
+    activeSlot = slot;
+    renderMemory();
+
+    const saved = savedSlots[slot];
+    if (!saved) {
+        playbackStatus.textContent = `Slot ${slot} vazio · pronto para salvar`;
+        persistWorkingState();
+        return;
+    }
+
+    gridPattern = normalizePattern(saved.pattern);
+    setTempo(saved.bpm);
+    renderGrid();
+    syncInputFromGrid();
+    persistWorkingState();
+    playbackStatus.textContent = `Slot ${slot} carregado`;
+}
+
+function saveActiveSlot() {
+    if (isPlaying) return;
+
+    savedSlots[activeSlot] = {
+        pattern: gridPattern.slice(),
+        bpm: Number(tempo.value)
+    };
+    persistWorkingState();
+    renderMemory();
+    playbackStatus.textContent = `Pattern salvo no slot ${activeSlot}`;
+}
+
+function renderMemory() {
+    activeSlotLabel.textContent = `Slot ${activeSlot}`;
+
+    slotButtons.forEach((button) => {
+        const slot = button.dataset.slot;
+        const isActive = slot === activeSlot;
+        button.classList.toggle('is-active', isActive);
+        button.classList.toggle('has-pattern', Boolean(savedSlots[slot]));
+        button.setAttribute('aria-pressed', String(isActive));
+        button.setAttribute(
+            'aria-label',
+            savedSlots[slot] ? `Slot ${slot}, pattern salvo` : `Slot ${slot}, vazio`
+        );
+    });
+}
+
+function loadDemoPattern() {
+    if (isPlaying) return;
+
+    gridPattern = DEMO_PATTERN.slice();
+    setTempo(112);
+    renderGrid();
+    syncInputFromGrid();
+    persistWorkingState();
+    playbackStatus.textContent = 'Groove demo carregado';
+}
+
+function registerTempoTap() {
+    if (isPlaying) return;
+
+    const now = performance.now();
+    if (tapTimes.length && now - tapTimes[tapTimes.length - 1] > 2000) {
+        tapTimes = [];
+    }
+
+    tapTimes.push(now);
+    tapTimes = tapTimes.slice(-6);
+
+    if (tapTimes.length < 2) {
+        playbackStatus.textContent = 'Tap Tempo · toque novamente';
+        return;
+    }
+
+    const intervals = tapTimes.slice(1).map((time, index) => time - tapTimes[index]);
+    const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+    const bpm = Math.round(60000 / averageInterval);
+
+    setTempo(bpm);
+    persistWorkingState();
+    playbackStatus.textContent = `Tap Tempo · ${tempo.value} BPM`;
+}
+
+function readStoredState() {
+    try {
+        const raw = window.localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || parsed.version !== 1) return null;
+
+        return parsed;
+    } catch (_) {
+        return null;
+    }
+}
+
+function restoreStoredState() {
+    const stored = readStoredState();
+    if (!stored) return;
+
+    gridPattern = normalizePattern(stored.working?.pattern);
+    setTempo(stored.working?.bpm ?? 120);
+
+    if (SLOT_NAMES.includes(stored.activeSlot)) activeSlot = stored.activeSlot;
+
+    SLOT_NAMES.forEach((slot) => {
+        const saved = stored.slots?.[slot];
+        if (!saved) return;
+
+        savedSlots[slot] = {
+            pattern: normalizePattern(saved.pattern),
+            bpm: Math.min(180, Math.max(70, Math.round(Number(saved.bpm) || 120)))
+        };
+    });
+}
+
+function persistWorkingState() {
+    try {
+        const state = {
+            version: 1,
+            activeSlot,
+            working: {
+                pattern: gridPattern.slice(),
+                bpm: Number(tempo.value)
+            },
+            slots: savedSlots
+        };
+
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (_) {
+        // Storage can be unavailable in private/restricted browser contexts.
+    }
 }
 
 async function ensureAudio() {
@@ -444,6 +628,10 @@ function setEditingDisabled(disabled) {
     quickPlayButton.disabled = disabled;
     gridPlayButton.disabled = disabled;
     clearButton.disabled = disabled;
+    saveSlotButton.disabled = disabled;
+    demoPatternButton.disabled = disabled;
+    tapTempoButton.disabled = disabled;
+    slotButtons.forEach((button) => { button.disabled = disabled; });
 
     stepGrid.querySelectorAll('.step-button').forEach((step) => {
         step.disabled = disabled;
@@ -474,7 +662,10 @@ function stopSequence({ announce = true } = {}) {
 }
 
 buildGrid();
+restoreStoredState();
 selectSound(selectedSound);
+renderGrid();
+syncInputFromGrid();
+renderMemory();
 updateTempo();
-syncGridFromInput();
 ensureAudio();

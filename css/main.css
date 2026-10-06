@@ -1226,3 +1226,46 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
         grid-row: 2;
     }
 }
+
+.kit-control {
+    min-height: 28px;
+    padding: 0 6px 0 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(7,9,13,.5);
+}
+
+.kit-control > span {
+    color: var(--muted-2);
+    font: 500 7px DM Mono, monospace;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.kit-control select {
+    min-height: 24px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #dfe4eb;
+    cursor: pointer;
+    font: 600 8px Manrope, sans-serif;
+}
+
+.kit-control select:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.kit-control select:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+    .kit-control > span { display: none; }
+    .kit-control { padding-left: 6px; }
+}

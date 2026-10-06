@@ -228,7 +228,7 @@
                             <span class="section-number">02</span>
                             <div>
                                 <p class="section-kicker">Pattern</p>
-                                <h3 id="step-sequencer-title">16 passos</h3>
+                                <h3 id="step-sequencer-title">9 × 16 lanes</h3>
                             </div>
                         </div>
                         <button class="grid-play" id="grid-play" type="button">
@@ -243,7 +243,7 @@
                             <small>Som selecionado</small>
                             <strong id="selected-sound">Pad 01 · Q</strong>
                         </div>
-                        <span class="selected-sound-hint">clique nos passos</span>
+                        <span class="selected-sound-hint">mixer / audition</span>
                     </div>
 
                     <div class="swing-control">
@@ -255,16 +255,15 @@
                         <output id="swing-value" for="swing">50%</output>
                     </div>
 
-                    <div class="step-groups">
-                        <span>01–04</span><span>05–08</span><span>09–12</span><span>13–16</span>
+                    <div class="lane-grid-shell" tabindex="0" aria-label="Sequenciador polifônico, role horizontal">
+                        <div class="step-grid" id="step-grid" role="grid" aria-label="9 instrumentos por 16 passos" aria-describedby="step-help"></div>
                     </div>
-                    <div class="step-grid" id="step-grid" role="group" aria-label="16 passos do sequenciador" aria-describedby="step-help"></div>
-                    <p class="step-help" id="step-help">Escolha um pad e toque em um passo para adicionar ou substituir o som. Toque novamente no mesmo passo para removê-lo.</p>
+                    <p class="step-help" id="step-help">Cada linha é um instrumento. Ative vários botões na mesma coluna para tocar sons simultaneamente. A área rola horizontalmente em telas estreitas.</p>
 
                     <form class="composer" id="composer">
                         <div class="composer-heading">
                             <div>
-                                <span class="control-overline">Quick pattern</span>
+                                <span class="control-overline">Quick pattern / mono</span>
                                 <label for="input">Entrada rápida</label>
                             </div>
                             <span>16 caracteres</span>
@@ -279,7 +278,7 @@
                                 Tocar
                             </button>
                         </div>
-                        <p id="input-help">Q W E · A S D · Z X C. Espaço, ponto ou hífen criam pausas. Pressione Esc para parar.</p>
+                        <p id="input-help">Q W E · A S D · Z X C. Espaço, ponto ou hífen criam pausas. Editar aqui substitui o pattern por uma versão monofônica. Pressione Esc para parar.</p>
                     </form>
                 </section>
             </div>
@@ -300,7 +299,6 @@
     <audio id="s_keyz" src="music/keyz.wav" preload="none"></audio>
     <audio id="s_keyx" src="music/keyx.wav" preload="none"></audio>
     <audio id="s_keyc" src="music/keyc.wav" preload="none"></audio>
-    <script src="js/core.js"></script>
     <script src="js/core.js"></script>
     <script src="js/audio-engine.js"></script>
     <script src="js/main.js"></script>

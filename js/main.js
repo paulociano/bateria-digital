@@ -85,6 +85,8 @@ const activeSlotLabel = document.querySelector('#active-slot');
 const saveSlotButton = document.querySelector('#save-slot');
 const demoPatternButton = document.querySelector('#demo-pattern');
 const tapTempoButton = document.querySelector('#tap-tempo');
+const sharePatternButton = document.querySelector('#share-pattern');
+const recordAudioButton = document.querySelector('#record-audio');
 const kitSelect = document.querySelector('#kit-select');
 const swing = document.querySelector('#swing');
 const swingValue = document.querySelector('#swing-value');
@@ -113,6 +115,7 @@ let gridPattern = Array(GRID_STEPS).fill(null);
 let activeSlot = 'A';
 let savedSlots = Object.fromEntries(SLOT_NAMES.map((slot) => [slot, null]));
 let tapTimes = [];
+let isRecording = false;
 let swingAmount = 50;
 let channelStates = Object.fromEntries(
     Object.keys(sampleUrls).map((sound) => [sound, { volume: 1, muted: false, solo: false }])
@@ -213,6 +216,8 @@ slotButtons.forEach((button) => {
 saveSlotButton.addEventListener('click', saveActiveSlot);
 demoPatternButton.addEventListener('click', loadDemoPattern);
 tapTempoButton.addEventListener('click', registerTempoTap);
+sharePatternButton.addEventListener('click', shareCurrentPattern);
+recordAudioButton.addEventListener('click', toggleRecording);
 kitSelect.addEventListener('change', () => switchKit(kitSelect.value));
 
 swing.addEventListener('input', () => {
@@ -572,6 +577,162 @@ function registerTempoTap() {
     playbackStatus.textContent = `Tap Tempo · ${tempo.value} BPM`;
 }
 
+function buildPortableState() {
+    return {
+        version: 1,
+        pattern: gridPattern.slice(),
+        bpm: Number(tempo.value),
+        swing: swingAmount,
+        kit: activeKitId,
+        channels: channelStates
+    };
+}
+
+function encodePortableState(state) {
+    const bytes = new TextEncoder().encode(JSON.stringify(state));
+    let binary = '';
+    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
+
+    return btoa(binary)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/g, '');
+}
+
+function decodePortableState(encoded) {
+    try {
+        const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+        const binary = atob(padded);
+        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+        const parsed = JSON.parse(new TextDecoder().decode(bytes));
+
+        if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.pattern)) return null;
+        return parsed;
+    } catch (_) {
+        return null;
+    }
+}
+
+function applyPortableState(state) {
+    if (!state) return false;
+
+    if (KITS[state.kit]) activeKitId = state.kit;
+    sampleUrls = KITS[activeKitId].samples;
+    padLabels = KITS[activeKitId].labels;
+
+    gridPattern = normalizePattern(state.pattern);
+    setTempo(state.bpm ?? 120);
+    setSwing(state.swing ?? 50);
+
+    Object.keys(channelStates).forEach((sound) => {
+        channelStates[sound] = normalizeChannelState(state.channels?.[sound]);
+    });
+
+    return true;
+}
+
+function restoreSharedState() {
+    const match = window.location.hash.match(/^#p=([A-Za-z0-9_-]+)$/);
+    if (!match) return false;
+
+    const shared = decodePortableState(match[1]);
+    if (!shared) {
+        playbackStatus.textContent = 'Link de pattern inválido';
+        return false;
+    }
+
+    applyPortableState(shared);
+    return true;
+}
+
+async function shareCurrentPattern() {
+    const encoded = encodePortableState(buildPortableState());
+    const url = new URL(window.location.href);
+    url.hash = `p=${encoded}`;
+    window.history.replaceState(null, '', url);
+
+    try {
+        if (navigator.share) {
+            await navigator.share({
+                title: 'Bateria Digital — Pattern',
+                text: 'Abra este groove na Bateria Digital.',
+                url: url.toString()
+            });
+            playbackStatus.textContent = 'Pattern compartilhado';
+            return;
+        }
+
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(url.toString());
+            playbackStatus.textContent = 'Link do pattern copiado';
+            return;
+        }
+    } catch (error) {
+        if (error?.name === 'AbortError') {
+            playbackStatus.textContent = 'Compartilhamento cancelado';
+            return;
+        }
+    }
+
+    playbackStatus.textContent = 'Link preparado na barra do navegador';
+}
+
+function recordingExtension(type) {
+    if (type.includes('ogg')) return 'ogg';
+    return 'webm';
+}
+
+function downloadRecording(blob, type) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `bateria-digital-${Date.now()}.${recordingExtension(type)}`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function toggleRecording() {
+    const webAudioReady = await ensureAudio();
+    if (!webAudioReady || !audioEngine.canRecord()) {
+        playbackStatus.textContent = 'Gravação indisponível neste navegador';
+        return;
+    }
+
+    await audioEngine.resume();
+
+    if (!isRecording) {
+        const started = audioEngine.startRecording();
+        if (!started) {
+            playbackStatus.textContent = 'Não foi possível iniciar a gravação';
+            return;
+        }
+
+        isRecording = true;
+        recordAudioButton.setAttribute('aria-pressed', 'true');
+        recordAudioButton.querySelector('span').textContent = 'Finalizar';
+        recordAudioButton.querySelector('small').textContent = 'gerar arquivo';
+        playbackStatus.textContent = 'Gravando master';
+        return;
+    }
+
+    const result = await audioEngine.stopRecording();
+    isRecording = false;
+    recordAudioButton.setAttribute('aria-pressed', 'false');
+    recordAudioButton.querySelector('span').textContent = 'Gravar';
+    recordAudioButton.querySelector('small').textContent = 'exportar áudio';
+
+    if (!result?.blob?.size) {
+        playbackStatus.textContent = 'Gravação vazia';
+        return;
+    }
+
+    downloadRecording(result.blob, result.type);
+    playbackStatus.textContent = 'Áudio exportado';
+}
+
 function readStoredState() {
     try {
         const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -881,6 +1042,8 @@ function stopSequence({ announce = true } = {}) {
 
 buildGrid();
 restoreStoredState();
+const sharedStateLoaded = restoreSharedState();
+if (sharedStateLoaded) persistWorkingState();
 audioEngine = new window.AudioEngine(sampleUrls);
 updateFallbackSources();
 renderKitLabels();

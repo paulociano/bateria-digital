@@ -99,3 +99,12 @@ Evitar motion decorativo contínuo. Respeitar `prefers-reduced-motion`.
 - Volume usa azul elétrico; Mute/Solo usam o acento coral somente quando ativos.
 - Solo tem precedência global de audição; Mute continua silenciando mesmo um canal em Solo.
 - Controles de mixer e Swing são persistidos no estado local de trabalho.
+
+
+## Kit selector and pad semantics
+
+- O seletor de kit fica junto da identidade BD—16, pois altera a identidade sonora global.
+- O kit Original preserva labels neutros até existir provenance confiável dos WAVs históricos.
+- Kits com metadata confiável mostram o nome real do instrumento no pad, no mixer e nos rótulos acessíveis.
+- Trocar de kit preserva pattern, BPM, Swing e estados de mixer.
+- Cores dos pads pertencem à posição/atalho e não mudam entre kits, para preservar memória motora.

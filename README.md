@@ -46,6 +46,8 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - Swing entre 50% e 75%
 - volume individual por pad
 - Mute e Solo por pad
+- dois kits: Original e Studio CC0
+- labels instrumentais reais no kit Studio CC0
 - layout responsivo
 - suporte a `prefers-reduced-motion`
 
@@ -308,3 +310,30 @@ Sem cadastro, sem dependências e sem configuração.
 
 Desenvolvido por **Paulo Henrique**.
 
+
+
+## Kits de bateria
+
+A Bateria Digital possui dois kits:
+
+### Original
+
+Preserva os nove WAVs históricos do projeto. Como o repositório original não documentava a identidade instrumental de cada arquivo, seus rótulos permanecem neutros como **Sample 01–09**.
+
+### Studio CC0
+
+Kit adicional com nove one-shots CC0 importados do projeto open source Groovie:
+
+| Tecla | Instrumento |
+| --- | --- |
+| Q | Kick |
+| W | Snare |
+| E | Closed Hat |
+| A | Clap |
+| S | Low Tom |
+| D | Mid Tom |
+| Z | High Tom |
+| X | Open Hat |
+| C | Crash |
+
+A origem e o licenciamento dos arquivos estão documentados em `THIRD_PARTY_SAMPLES.md`.

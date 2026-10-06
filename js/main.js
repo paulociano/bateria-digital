@@ -1,26 +1,60 @@
 const validKeys = new Set(['q', 'w', 'e', 'a', 's', 'd', 'z', 'x', 'c']);
-const sampleUrls = {
-    keyq: 'music/keyq.wav',
-    keyw: 'music/keyw.wav',
-    keye: 'music/keye.wav',
-    keya: 'music/keya.wav',
-    keys: 'music/keys.wav',
-    keyd: 'music/keyd.wav',
-    keyz: 'music/keyz.wav',
-    keyx: 'music/keyx.wav',
-    keyc: 'music/keyc.wav'
+const KITS = {
+    original: {
+        name: 'Original',
+        samples: {
+            keyq: 'music/keyq.wav',
+            keyw: 'music/keyw.wav',
+            keye: 'music/keye.wav',
+            keya: 'music/keya.wav',
+            keys: 'music/keys.wav',
+            keyd: 'music/keyd.wav',
+            keyz: 'music/keyz.wav',
+            keyx: 'music/keyx.wav',
+            keyc: 'music/keyc.wav'
+        },
+        labels: {
+            keyq: 'Sample 01 · Q',
+            keyw: 'Sample 02 · W',
+            keye: 'Sample 03 · E',
+            keya: 'Sample 04 · A',
+            keys: 'Sample 05 · S',
+            keyd: 'Sample 06 · D',
+            keyz: 'Sample 07 · Z',
+            keyx: 'Sample 08 · X',
+            keyc: 'Sample 09 · C'
+        }
+    },
+    'studio-cc0': {
+        name: 'Studio CC0',
+        samples: {
+            keyq: 'music/kits/studio-cc0/kick.wav',
+            keyw: 'music/kits/studio-cc0/snare.wav',
+            keye: 'music/kits/studio-cc0/hat-closed.wav',
+            keya: 'music/kits/studio-cc0/clap.wav',
+            keys: 'music/kits/studio-cc0/tom-low.wav',
+            keyd: 'music/kits/studio-cc0/tom-mid.wav',
+            keyz: 'music/kits/studio-cc0/tom-high.wav',
+            keyx: 'music/kits/studio-cc0/hat-open.wav',
+            keyc: 'music/kits/studio-cc0/crash.wav'
+        },
+        labels: {
+            keyq: 'Kick · Q',
+            keyw: 'Snare · W',
+            keye: 'Closed Hat · E',
+            keya: 'Clap · A',
+            keys: 'Low Tom · S',
+            keyd: 'Mid Tom · D',
+            keyz: 'High Tom · Z',
+            keyx: 'Open Hat · X',
+            keyc: 'Crash · C'
+        }
+    }
 };
-const padLabels = {
-    keyq: 'Pad 01 · Q',
-    keyw: 'Pad 02 · W',
-    keye: 'Pad 03 · E',
-    keya: 'Pad 04 · A',
-    keys: 'Pad 05 · S',
-    keyd: 'Pad 06 · D',
-    keyz: 'Pad 07 · Z',
-    keyx: 'Pad 08 · X',
-    keyc: 'Pad 09 · C'
-};
+
+let activeKitId = 'original';
+let sampleUrls = KITS[activeKitId].samples;
+let padLabels = KITS[activeKitId].labels;
 
 const GRID_STEPS = 16;
 const STORAGE_KEY = 'bateria-digital:state:v1';
@@ -51,6 +85,7 @@ const activeSlotLabel = document.querySelector('#active-slot');
 const saveSlotButton = document.querySelector('#save-slot');
 const demoPatternButton = document.querySelector('#demo-pattern');
 const tapTempoButton = document.querySelector('#tap-tempo');
+const kitSelect = document.querySelector('#kit-select');
 const swing = document.querySelector('#swing');
 const swingValue = document.querySelector('#swing-value');
 const channelName = document.querySelector('#channel-name');
@@ -59,7 +94,7 @@ const channelVolumeValue = document.querySelector('#channel-volume-value');
 const channelMuteButton = document.querySelector('#channel-mute');
 const channelSoloButton = document.querySelector('#channel-solo');
 
-const audioEngine = new window.AudioEngine(sampleUrls);
+let audioEngine = null;
 const LOOK_AHEAD_MS = 25;
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 
@@ -178,6 +213,7 @@ slotButtons.forEach((button) => {
 saveSlotButton.addEventListener('click', saveActiveSlot);
 demoPatternButton.addEventListener('click', loadDemoPattern);
 tapTempoButton.addEventListener('click', registerTempoTap);
+kitSelect.addEventListener('change', () => switchKit(kitSelect.value));
 
 swing.addEventListener('input', () => {
     setSwing(swing.value);
@@ -220,6 +256,65 @@ function parsePattern(value) {
     });
 
     return pattern.slice(0, GRID_STEPS);
+}
+
+function renderKitLabels() {
+    kitSelect.value = activeKitId;
+
+    keys.querySelectorAll('[data-key]').forEach((pad) => {
+        const sound = pad.dataset.key;
+        const label = padLabels[sound];
+        const name = label.split(' · ')[0];
+        const small = pad.querySelector('[data-pad-name]');
+        if (small) small.textContent = name;
+        pad.setAttribute('aria-label', label);
+    });
+
+    selectedSoundLabel.textContent = padLabels[selectedSound];
+    channelName.textContent = padLabels[selectedSound];
+}
+
+function updateFallbackSources() {
+    Object.entries(sampleUrls).forEach(([sound, src]) => {
+        const audio = document.querySelector(`#s_${sound}`);
+        if (!audio) return;
+        audio.src = src;
+        audio.load();
+    });
+}
+
+async function switchKit(kitId, { persist = true, announce = true } = {}) {
+    if (!KITS[kitId] || kitId === activeKitId && audioEngine) {
+        renderKitLabels();
+        return;
+    }
+
+    stopSequence({ announce: false });
+    setEditingDisabled(true);
+
+    if (audioEngine) await audioEngine.destroy();
+
+    activeKitId = kitId;
+    sampleUrls = KITS[activeKitId].samples;
+    padLabels = KITS[activeKitId].labels;
+    audioEngine = new window.AudioEngine(sampleUrls);
+    audioMode = 'pending';
+    audioReadyPromise = null;
+
+    updateFallbackSources();
+    renderKitLabels();
+    renderGrid();
+    renderChannelStrip();
+
+    const ready = await ensureAudio();
+    if (!isPlaying) setEditingDisabled(false);
+
+    if (persist) persistWorkingState();
+    if (announce) {
+        playbackStatus.textContent = ready
+            ? `Kit ${KITS[activeKitId].name} carregado`
+            : `Kit ${KITS[activeKitId].name} · modo compatível`;
+    }
 }
 
 function normalizePattern(pattern) {
@@ -503,6 +598,10 @@ function restoreStoredState() {
         channelStates[sound] = normalizeChannelState(stored.working?.channels?.[sound]);
     });
 
+    if (KITS[stored.working?.kit]) activeKitId = stored.working.kit;
+    sampleUrls = KITS[activeKitId].samples;
+    padLabels = KITS[activeKitId].labels;
+
     if (SLOT_NAMES.includes(stored.activeSlot)) activeSlot = stored.activeSlot;
 
     SLOT_NAMES.forEach((slot) => {
@@ -525,7 +624,8 @@ function persistWorkingState() {
                 pattern: gridPattern.slice(),
                 bpm: Number(tempo.value),
                 swing: swingAmount,
-                channels: channelStates
+                channels: channelStates,
+                kit: activeKitId
             },
             slots: savedSlots
         };
@@ -539,6 +639,8 @@ function persistWorkingState() {
 async function ensureAudio() {
     if (audioMode === 'web-audio') return true;
     if (audioMode === 'fallback') return false;
+
+    if (!audioEngine) audioEngine = new window.AudioEngine(sampleUrls);
 
     if (!audioReadyPromise) {
         audioReadyPromise = audioEngine.init().then((ready) => {
@@ -726,7 +828,7 @@ function clearPlaybackTimers() {
 }
 
 function stopAllAudio() {
-    audioEngine.stopAll();
+    audioEngine?.stopAll();
 
     document.querySelectorAll('audio').forEach((audio) => {
         audio.pause();
@@ -742,6 +844,7 @@ function setEditingDisabled(disabled) {
     saveSlotButton.disabled = disabled;
     demoPatternButton.disabled = disabled;
     tapTempoButton.disabled = disabled;
+    kitSelect.disabled = disabled;
     swing.disabled = disabled;
     channelVolume.disabled = disabled;
     channelMuteButton.disabled = disabled;
@@ -778,6 +881,9 @@ function stopSequence({ announce = true } = {}) {
 
 buildGrid();
 restoreStoredState();
+audioEngine = new window.AudioEngine(sampleUrls);
+updateFallbackSources();
+renderKitLabels();
 setSwing(swingAmount);
 selectSound(selectedSound);
 renderGrid();

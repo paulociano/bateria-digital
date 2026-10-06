@@ -129,6 +129,21 @@
             });
         }
 
+        async destroy() {
+            this.stopAll();
+
+            if (this.context && this.context.state !== 'closed') {
+                await this.context.close().catch(() => {});
+            }
+
+            this.context = null;
+            this.output = null;
+            this.buffers.clear();
+            this.channels.clear();
+            this.ready = false;
+            this.initializing = null;
+        }
+
         stopAll() {
             this.activeSources.forEach((source) => {
                 try {

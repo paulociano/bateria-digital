@@ -1,3 +1,4 @@
+const Core = window.BateriaCore;
 const validKeys = new Set(['q', 'w', 'e', 'a', 's', 'd', 'z', 'x', 'c']);
 const KITS = {
     original: {
@@ -247,20 +248,7 @@ channelSoloButton.addEventListener('click', () => {
 });
 
 function parsePattern(value) {
-    const pattern = [];
-
-    [...value.toLowerCase()].forEach((character) => {
-        if (validKeys.has(character)) {
-            pattern.push(`key${character}`);
-            return;
-        }
-
-        if (/\s/.test(character) || character === '.' || character === '-') {
-            pattern.push(null);
-        }
-    });
-
-    return pattern.slice(0, GRID_STEPS);
+    return Core.parsePattern(value, GRID_STEPS);
 }
 
 function renderKitLabels() {
@@ -329,16 +317,11 @@ async function switchKit(kitId, { persist = true, announce = true } = {}) {
 }
 
 function normalizePattern(pattern) {
-    if (!Array.isArray(pattern)) return Array(GRID_STEPS).fill(null);
-
-    return Array.from({ length: GRID_STEPS }, (_, index) => {
-        const sound = pattern[index];
-        return sound === null || sampleUrls[sound] ? sound ?? null : null;
-    });
+    return Core.normalizePattern(pattern, sampleUrls, GRID_STEPS);
 }
 
 function soundToKey(sound) {
-    return sound ? sound.slice(-1) : '-';
+    return Core.soundToKey(sound);
 }
 
 function selectSound(sound) {
@@ -431,12 +414,7 @@ function setSwing(value) {
 }
 
 function normalizeChannelState(state) {
-    const rawVolume = Number(state?.volume);
-    return {
-        volume: Number.isFinite(rawVolume) ? Math.min(1, Math.max(0, rawVolume)) : 1,
-        muted: Boolean(state?.muted),
-        solo: Boolean(state?.solo)
-    };
+    return Core.normalizeChannelState(state);
 }
 
 function renderChannelStrip() {
@@ -595,29 +573,11 @@ function buildPortableState() {
 }
 
 function encodePortableState(state) {
-    const bytes = new TextEncoder().encode(JSON.stringify(state));
-    let binary = '';
-    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
-
-    return btoa(binary)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/g, '');
+    return Core.encodePortableState(state);
 }
 
 function decodePortableState(encoded) {
-    try {
-        const normalized = encoded.replace(/-/g, '+').replace(/_/g, '/');
-        const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
-        const binary = atob(padded);
-        const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-        const parsed = JSON.parse(new TextDecoder().decode(bytes));
-
-        if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.pattern)) return null;
-        return parsed;
-    } catch (_) {
-        return null;
-    }
+    return Core.decodePortableState(encoded);
 }
 
 function applyPortableState(state) {
@@ -1061,4 +1021,3 @@ renderMemory();
 renderChannelStrip();
 updateTempo();
 applyAllChannelStates();
-ensureAudio();

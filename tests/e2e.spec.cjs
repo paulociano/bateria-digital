@@ -97,6 +97,7 @@ test('shared URL state overrides pre-existing local state', async ({ page }) => 
         channels: {}
     }));
 
+    await page.goto('about:blank');
     await page.goto(`${baseURL}/#p=${payload}`);
 
     await expect(page.locator('#input')).toHaveValue('q-s');
@@ -106,6 +107,7 @@ test('shared URL state overrides pre-existing local state', async ({ page }) => 
 });
 
 test('invalid shared hash does not break the application', async ({ page }) => {
+    await page.goto('about:blank');
     await page.goto(`${baseURL}/#p=invalid-payload`);
     await expect(page.locator('#playback-status')).toHaveText('Link de pattern inválido');
     await expect(page.locator('.step-button')).toHaveCount(16);

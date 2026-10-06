@@ -39,6 +39,10 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - engine baseada em Web Audio API, com fallback para HTMLAudio
 - indicação de estado durante a reprodução
 - controles separados para loop, interrupção e limpeza da sequência
+- persistência local automática do pattern e BPM
+- quatro slots locais de memória (A/B/C/D)
+- Tap Tempo
+- groove demo carregável
 - layout responsivo
 - suporte a `prefers-reduced-motion`
 
@@ -85,6 +89,21 @@ qwe asd zxc
 Caracteres que não correspondem aos pads são ignorados. Espaço, ponto (`.`) e hífen (`-`) representam pausas reais entre os sons.
 
 Ao editar o texto, os primeiros 16 passos do grid são atualizados. Ao editar o grid, o texto é reescrito usando a tecla de cada pad e hífen para pausas. O controle **Loop** repete a sequência, **Parar** interrompe sem apagar o texto e **Limpar** remove apenas o conteúdo do sequenciador.
+
+## Memória de patterns
+
+O estado de trabalho atual é salvo automaticamente no `localStorage`, incluindo pattern e BPM. A interface também oferece quatro slots locais, **A/B/C/D**:
+
+- selecione um slot para torná-lo ativo;
+- clique em **Salvar** para gravar pattern e BPM naquele slot;
+- slots já gravados podem ser carregados com um clique;
+- os dados ficam somente no navegador atual.
+
+O botão **Demo** carrega um groove de exemplo sem sobrescrever nenhum slot até que o usuário salve explicitamente.
+
+## Tap Tempo
+
+O botão **Tap Tempo** calcula o BPM a partir do intervalo entre os últimos toques. Após uma pausa longa, a medição reinicia para evitar que um tap antigo distorça o valor.
 
 ## Controle de BPM
 
@@ -157,7 +176,9 @@ Concentra o comportamento da aplicação:
 - controle de BPM;
 - agendamento da sequência;
 - cancelamento dos timers;
-- atualização do estado visual.
+- atualização do estado visual;
+- persistência local e slots de pattern;
+- cálculo de Tap Tempo.
 
 ### `css/main.css`
 

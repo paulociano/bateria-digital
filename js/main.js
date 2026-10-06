@@ -51,6 +51,13 @@ const activeSlotLabel = document.querySelector('#active-slot');
 const saveSlotButton = document.querySelector('#save-slot');
 const demoPatternButton = document.querySelector('#demo-pattern');
 const tapTempoButton = document.querySelector('#tap-tempo');
+const swing = document.querySelector('#swing');
+const swingValue = document.querySelector('#swing-value');
+const channelName = document.querySelector('#channel-name');
+const channelVolume = document.querySelector('#channel-volume');
+const channelVolumeValue = document.querySelector('#channel-volume-value');
+const channelMuteButton = document.querySelector('#channel-mute');
+const channelSoloButton = document.querySelector('#channel-solo');
 
 const audioEngine = new window.AudioEngine(sampleUrls);
 const LOOK_AHEAD_MS = 25;
@@ -71,6 +78,10 @@ let gridPattern = Array(GRID_STEPS).fill(null);
 let activeSlot = 'A';
 let savedSlots = Object.fromEntries(SLOT_NAMES.map((slot) => [slot, null]));
 let tapTimes = [];
+let swingAmount = 50;
+let channelStates = Object.fromEntries(
+    Object.keys(sampleUrls).map((sound) => [sound, { volume: 1, muted: false, solo: false }])
+);
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isPlaying) {
@@ -168,6 +179,32 @@ saveSlotButton.addEventListener('click', saveActiveSlot);
 demoPatternButton.addEventListener('click', loadDemoPattern);
 tapTempoButton.addEventListener('click', registerTempoTap);
 
+swing.addEventListener('input', () => {
+    setSwing(swing.value);
+    persistWorkingState();
+});
+
+channelVolume.addEventListener('input', () => {
+    channelStates[selectedSound].volume = Number(channelVolume.value) / 100;
+    applyChannelState(selectedSound);
+    renderChannelStrip();
+    persistWorkingState();
+});
+
+channelMuteButton.addEventListener('click', () => {
+    channelStates[selectedSound].muted = !channelStates[selectedSound].muted;
+    applyAllChannelStates();
+    renderChannelStrip();
+    persistWorkingState();
+});
+
+channelSoloButton.addEventListener('click', () => {
+    channelStates[selectedSound].solo = !channelStates[selectedSound].solo;
+    applyAllChannelStates();
+    renderChannelStrip();
+    persistWorkingState();
+});
+
 function parsePattern(value) {
     const pattern = [];
 
@@ -209,6 +246,7 @@ function selectSound(sound) {
     });
 
     renderGrid();
+    renderChannelStrip();
 }
 
 function toggleGridStep(index) {
@@ -273,6 +311,69 @@ function syncGridFromInput() {
 function syncInputFromGrid() {
     const serialized = gridPattern.map(soundToKey).join('').replace(/-+$/, '');
     input.value = serialized;
+}
+
+function setSwing(value) {
+    const numeric = Math.round(Number(value));
+    swingAmount = Math.min(75, Math.max(50, numeric || 50));
+    swing.value = String(swingAmount);
+    swingValue.value = `${swingAmount}%`;
+    swing.setAttribute('aria-valuetext', `${swingAmount}%`);
+
+    const percentage = ((swingAmount - 50) / 25) * 100;
+    swing.style.background = `linear-gradient(90deg, #ff705e ${percentage}%, #303744 ${percentage}%)`;
+}
+
+function normalizeChannelState(state) {
+    const rawVolume = Number(state?.volume);
+    return {
+        volume: Number.isFinite(rawVolume) ? Math.min(1, Math.max(0, rawVolume)) : 1,
+        muted: Boolean(state?.muted),
+        solo: Boolean(state?.solo)
+    };
+}
+
+function renderChannelStrip() {
+    const state = channelStates[selectedSound];
+    const percent = Math.round(state.volume * 100);
+
+    channelName.textContent = padLabels[selectedSound];
+    channelVolume.value = String(percent);
+    channelVolumeValue.value = `${percent}%`;
+    channelVolume.setAttribute('aria-valuetext', `${percent}%`);
+    channelVolume.style.background = `linear-gradient(90deg, #5da9ff ${percent}%, #303744 ${percent}%)`;
+    channelMuteButton.setAttribute('aria-pressed', String(state.muted));
+    channelSoloButton.setAttribute('aria-pressed', String(state.solo));
+}
+
+function isChannelAudible(sound) {
+    const state = channelStates[sound];
+    const hasSolo = Object.values(channelStates).some((item) => item.solo);
+    return !state.muted && (!hasSolo || state.solo) && state.volume > 0;
+}
+
+function applyFallbackChannelState(sound) {
+    const audio = document.querySelector(`#s_${sound}`);
+    if (!audio) return;
+
+    audio.volume = channelStates[sound].volume;
+    audio.muted = !isChannelAudible(sound);
+}
+
+function applyChannelState(sound) {
+    if (audioMode === 'web-audio') {
+        audioEngine.setChannel(sound, channelStates[sound]);
+    }
+    applyFallbackChannelState(sound);
+}
+
+function applyAllChannelStates() {
+    Object.keys(channelStates).forEach(applyChannelState);
+}
+
+function swingOffsetSeconds(stepIndex) {
+    if (stepIndex % 2 === 0) return 0;
+    return stepDurationSeconds() * 2 * ((swingAmount / 100) - 0.5);
 }
 
 function setTempo(value) {
@@ -396,6 +497,11 @@ function restoreStoredState() {
 
     gridPattern = normalizePattern(stored.working?.pattern);
     setTempo(stored.working?.bpm ?? 120);
+    setSwing(stored.working?.swing ?? 50);
+
+    Object.keys(channelStates).forEach((sound) => {
+        channelStates[sound] = normalizeChannelState(stored.working?.channels?.[sound]);
+    });
 
     if (SLOT_NAMES.includes(stored.activeSlot)) activeSlot = stored.activeSlot;
 
@@ -417,7 +523,9 @@ function persistWorkingState() {
             activeSlot,
             working: {
                 pattern: gridPattern.slice(),
-                bpm: Number(tempo.value)
+                bpm: Number(tempo.value),
+                swing: swingAmount,
+                channels: channelStates
             },
             slots: savedSlots
         };
@@ -435,6 +543,7 @@ async function ensureAudio() {
     if (!audioReadyPromise) {
         audioReadyPromise = audioEngine.init().then((ready) => {
             audioMode = ready ? 'web-audio' : 'fallback';
+            applyAllChannelStates();
             return ready;
         });
     }
@@ -493,8 +602,9 @@ function scheduleAhead() {
         const stepIndex = currentStep;
         const token = currentPattern[stepIndex];
 
-        if (token) audioEngine.playAt(token, nextStepTime);
-        scheduleVisualStep(stepIndex, token, nextStepTime);
+        const scheduledTime = nextStepTime + swingOffsetSeconds(stepIndex);
+        if (token) audioEngine.playAt(token, scheduledTime);
+        scheduleVisualStep(stepIndex, token, scheduledTime);
 
         nextStepTime += stepDurationSeconds();
         currentStep += 1;
@@ -539,7 +649,7 @@ function playFallbackCycle() {
                 flashPad(token);
                 playFallbackSound(token);
             }
-        }, index * interval);
+        }, index * interval + swingOffsetSeconds(index) * 1000);
     });
 
     trackTimeout(() => {
@@ -579,8 +689,9 @@ function flashPad(sound) {
 
 function playFallbackSound(sound) {
     const audio = document.querySelector(`#s_${sound}`);
-    if (!audio) return;
+    if (!audio || !isChannelAudible(sound)) return;
 
+    applyFallbackChannelState(sound);
     audio.currentTime = 0;
     audio.play().catch(() => {
         playbackStatus.textContent = 'Áudio indisponível';
@@ -631,6 +742,10 @@ function setEditingDisabled(disabled) {
     saveSlotButton.disabled = disabled;
     demoPatternButton.disabled = disabled;
     tapTempoButton.disabled = disabled;
+    swing.disabled = disabled;
+    channelVolume.disabled = disabled;
+    channelMuteButton.disabled = disabled;
+    channelSoloButton.disabled = disabled;
     slotButtons.forEach((button) => { button.disabled = disabled; });
 
     stepGrid.querySelectorAll('.step-button').forEach((step) => {
@@ -663,9 +778,12 @@ function stopSequence({ announce = true } = {}) {
 
 buildGrid();
 restoreStoredState();
+setSwing(swingAmount);
 selectSound(selectedSound);
 renderGrid();
 syncInputFromGrid();
 renderMemory();
+renderChannelStrip();
 updateTempo();
+applyAllChannelStates();
 ensureAudio();

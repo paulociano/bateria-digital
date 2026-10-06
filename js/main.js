@@ -289,6 +289,12 @@ function updateFallbackSources() {
 }
 
 async function switchKit(kitId, { persist = true, announce = true } = {}) {
+    if (isRecording) {
+        kitSelect.value = activeKitId;
+        playbackStatus.textContent = 'Finalize a gravação antes de trocar o kit';
+        return;
+    }
+
     if (!KITS[kitId] || kitId === activeKitId && audioEngine) {
         renderKitLabels();
         return;

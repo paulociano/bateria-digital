@@ -96,13 +96,13 @@ O controle de velocidade permite escolher valores entre:
 
 O tempo selecionado altera o intervalo entre os sons reproduzidos pelo sequenciador.
 
-O cálculo utilizado atualmente é baseado em subdivisões de meio tempo:
+O grid de 16 passos usa subdivisões de semicolcheia, formando um compasso 4/4 completo:
 
 ```javascript
-60000 / BPM / 2
+60000 / BPM / 4
 ```
 
-Assim, valores maiores de BPM produzem sequências mais rápidas.
+Assim, 16 passos correspondem a quatro tempos, e valores maiores de BPM produzem patterns mais rápidos.
 
 ## Arquitetura
 

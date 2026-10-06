@@ -90,3 +90,12 @@ Evitar motion decorativo contínuo. Respeitar `prefers-reduced-motion`.
 - Salvar é explícito. Trocar para slot vazio não deve apagar o pattern atual.
 - Demo e Tap Tempo são utilidades secundárias e não competem visualmente com Play/Stop.
 - Persistência é local e silenciosa; feedback de salvar/carregar aparece no status do instrumento.
+
+
+## Groove and mixer controls
+
+- Swing fica junto do sequenciador porque altera o feel do pattern, não o timbre.
+- O mixer é contextual ao pad selecionado para evitar nove faders permanentes.
+- Volume usa azul elétrico; Mute/Solo usam o acento coral somente quando ativos.
+- Solo tem precedência global de audição; Mute continua silenciando mesmo um canal em Solo.
+- Controles de mixer e Swing são persistidos no estado local de trabalho.

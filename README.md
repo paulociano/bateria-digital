@@ -43,6 +43,9 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - quatro slots locais de memória (A/B/C/D)
 - Tap Tempo
 - groove demo carregável
+- Swing entre 50% e 75%
+- volume individual por pad
+- Mute e Solo por pad
 - layout responsivo
 - suporte a `prefers-reduced-motion`
 
@@ -104,6 +107,20 @@ O botão **Demo** carrega um groove de exemplo sem sobrescrever nenhum slot até
 ## Tap Tempo
 
 O botão **Tap Tempo** calcula o BPM a partir do intervalo entre os últimos toques. Após uma pausa longa, a medição reinicia para evitar que um tap antigo distorça o valor.
+
+## Swing
+
+O controle de **Swing** trabalha entre 50% e 75%. Em 50%, as semicolcheias ficam retas. Valores maiores atrasam os passos pares de cada par rítmico, criando um groove progressivamente mais deslocado; em torno de 66% o feel se aproxima de uma subdivisão ternária.
+
+## Mixer por pad
+
+O pad selecionado também define o canal exibido no mixer. Cada um dos nove pads mantém estado próprio de:
+
+- volume de 0% a 100%;
+- **Mute**;
+- **Solo**.
+
+Quando existe pelo menos um canal em Solo, somente os canais marcados como Solo permanecem audíveis. Mute sempre silencia o canal. Esses estados são persistidos localmente junto do pattern de trabalho.
 
 ## Controle de BPM
 
@@ -178,7 +195,9 @@ Concentra o comportamento da aplicação:
 - cancelamento dos timers;
 - atualização do estado visual;
 - persistência local e slots de pattern;
-- cálculo de Tap Tempo.
+- cálculo de Tap Tempo;
+- aplicação de Swing no scheduler;
+- estado de mixer por pad com volume, Mute e Solo.
 
 ### `css/main.css`
 

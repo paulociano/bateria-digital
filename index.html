@@ -23,13 +23,17 @@
         <section class="intro" aria-labelledby="page-title">
             <p class="eyebrow">Crie. Toque. Repita.</p>
             <h1 id="page-title">Seu ritmo começa <em>aqui.</em></h1>
-            <p class="subtitle">Transforme ideias em batidas. Use o teclado, combine samples e encontre o seu groove.</p>
-            <div class="shortcut" aria-label="Atalho de teclado">
-                <span>Atalho</span>
+            <p class="subtitle">Toque livremente nos pads ou transforme uma sequência curta em um loop. Sem cadastro, sem configuração.</p>
+
+            <div class="shortcut" aria-label="Atalhos de teclado">
+                <span>Teclado</span>
                 <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd>
-                <span>até</span>
-                <kbd>C</kbd>
+                <span>·</span>
+                <kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+                <span>·</span>
+                <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd>
             </div>
+            <p class="touch-hint">Toque diretamente nos pads para começar.</p>
         </section>
 
         <section class="machine" aria-label="Bateria digital">
@@ -44,31 +48,45 @@
                 </div>
             </div>
 
-            <div class="controls" aria-label="Controles do sequenciador">
+            <div class="controls" aria-label="Controles de reprodução">
                 <div class="tempo">
-                    <div class="control-heading"><label for="tempo">Velocidade</label><output id="tempo-value" for="tempo">120 BPM</output></div>
-                    <input type="range" id="tempo" min="70" max="180" value="120" step="1">
+                    <div class="control-heading">
+                        <label for="tempo">Velocidade</label>
+                        <output id="tempo-value" for="tempo">120 BPM</output>
+                    </div>
+                    <input type="range" id="tempo" min="70" max="180" value="120" step="1" aria-valuetext="120 BPM">
                 </div>
-                <button class="clear" id="clear" type="button" aria-label="Limpar sequência">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.4 6.4 11.2 11.2m0-11.2L6.4 17.6"/></svg>
-                    Limpar
-                </button>
+
+                <div class="transport" aria-label="Transporte">
+                    <button class="transport-button transport-button--loop" id="loop" type="button" aria-pressed="false">
+                        Loop
+                    </button>
+                    <button class="transport-button" id="stop" type="button" disabled>
+                        Parar
+                    </button>
+                    <button class="transport-button transport-button--clear" id="clear" type="button">
+                        Limpar
+                    </button>
+                </div>
             </div>
 
             <div class="keys" aria-label="Pads de bateria">
-                <button type="button" data-key="keyq" class="key key--coral"><span>Q</span><small>01</small></button>
-                <button type="button" data-key="keyw" class="key key--gold"><span>W</span><small>02</small></button>
-                <button type="button" data-key="keye" class="key key--lime"><span>E</span><small>03</small></button>
-                <button type="button" data-key="keya" class="key key--violet"><span>A</span><small>04</small></button>
-                <button type="button" data-key="keys" class="key key--blue"><span>S</span><small>05</small></button>
-                <button type="button" data-key="keyd" class="key key--pink"><span>D</span><small>06</small></button>
-                <button type="button" data-key="keyz" class="key key--cyan"><span>Z</span><small>07</small></button>
-                <button type="button" data-key="keyx" class="key key--orange"><span>X</span><small>08</small></button>
-                <button type="button" data-key="keyc" class="key key--green"><span>C</span><small>09</small></button>
+                <button type="button" data-key="keyq" class="key key--coral" aria-label="Pad 01, tecla Q"><span>Q</span><small>PAD 01</small></button>
+                <button type="button" data-key="keyw" class="key key--gold" aria-label="Pad 02, tecla W"><span>W</span><small>PAD 02</small></button>
+                <button type="button" data-key="keye" class="key key--lime" aria-label="Pad 03, tecla E"><span>E</span><small>PAD 03</small></button>
+                <button type="button" data-key="keya" class="key key--violet" aria-label="Pad 04, tecla A"><span>A</span><small>PAD 04</small></button>
+                <button type="button" data-key="keys" class="key key--blue" aria-label="Pad 05, tecla S"><span>S</span><small>PAD 05</small></button>
+                <button type="button" data-key="keyd" class="key key--pink" aria-label="Pad 06, tecla D"><span>D</span><small>PAD 06</small></button>
+                <button type="button" data-key="keyz" class="key key--cyan" aria-label="Pad 07, tecla Z"><span>Z</span><small>PAD 07</small></button>
+                <button type="button" data-key="keyx" class="key key--orange" aria-label="Pad 08, tecla X"><span>X</span><small>PAD 08</small></button>
+                <button type="button" data-key="keyc" class="key key--green" aria-label="Pad 09, tecla C"><span>C</span><small>PAD 09</small></button>
             </div>
 
             <form class="composer" id="composer">
-                <label for="input">Sequenciador</label>
+                <div class="composer-heading">
+                    <label for="input">Sequenciador rápido</label>
+                    <span>até 32 caracteres</span>
+                </div>
                 <div class="composer-row">
                     <div class="input-shell">
                         <span aria-hidden="true">01</span>
@@ -79,7 +97,7 @@
                         Tocar
                     </button>
                 </div>
-                <p id="input-help">Use Q W E · A S D · Z X C — outros caracteres serão ignorados.</p>
+                <p id="input-help">Use Q W E · A S D · Z X C. Outros caracteres são ignorados. Pressione Esc para parar.</p>
             </form>
         </section>
     </main>

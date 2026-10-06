@@ -1269,3 +1269,25 @@ footer span { font: 500 7px DM Mono, monospace; text-transform: uppercase; lette
     .kit-control > span { display: none; }
     .kit-control { padding-left: 6px; }
 }
+
+.utility-button--record[aria-pressed="true"] {
+    border-color: rgba(255,112,94,.55);
+    background: rgba(255,112,94,.12);
+}
+
+.utility-button--record[aria-pressed="true"] span {
+    color: #ff9a8c;
+}
+
+.utility-button--record[aria-pressed="true"]::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    margin-right: 6px;
+    display: inline-block;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px rgba(255,112,94,.55);
+    animation: pulse .9s ease-in-out infinite;
+    vertical-align: middle;
+}

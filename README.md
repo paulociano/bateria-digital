@@ -34,8 +34,9 @@ e reproduzi-las automaticamente de acordo com o BPM selecionado.
 - sequenciador textual
 - controle de velocidade entre 70 e 180 BPM
 - feedback visual ao pressionar cada pad
+- feedback de progresso durante a reprodução da sequência
 - indicação de estado durante a reprodução
-- botão para interromper e limpar a sequência
+- controles separados para loop, interrupção e limpeza da sequência
 - layout responsivo
 - suporte a `prefers-reduced-motion`
 
@@ -65,7 +66,7 @@ Cada tecla reproduz imediatamente o sample associado ao pad.
 
 Clique ou toque diretamente em qualquer um dos nove pads da interface.
 
-O pad recebe feedback visual enquanto o som é disparado.
+O pad recebe feedback visual enquanto o som é disparado. Durante uma sequência, o status também informa o passo atual.
 
 ## Sequenciador
 
@@ -79,7 +80,7 @@ qwe asd zxc
 
 Caracteres que não correspondem aos pads são ignorados.
 
-Ao clicar em **Tocar**, a sequência é executada na ordem digitada.
+Ao clicar em **Tocar**, a sequência é executada na ordem digitada. O controle **Loop** repete a sequência, **Parar** interrompe sem apagar o texto e **Limpar** remove apenas o conteúdo do sequenciador.
 
 ## Controle de BPM
 
@@ -236,9 +237,10 @@ O projeto inclui alguns cuidados de acessibilidade, como:
 
 - elementos semânticos;
 - `aria-label` nos controles principais;
-- `aria-live` para informar o estado da reprodução;
-- estados de foco visíveis nos pads;
-- suporte a `prefers-reduced-motion`.
+- `aria-live` para informar o estado e o progresso da reprodução;
+- estados de foco visíveis nos controles interativos;
+- suporte a `prefers-reduced-motion`;
+- rótulos acessíveis para identificar cada pad e sua tecla.
 
 ## Ideia central
 

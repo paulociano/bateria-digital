@@ -63,6 +63,15 @@ Motion deve informar estado:
 
 Evitar motion decorativo contínuo. Respeitar `prefers-reduced-motion`.
 
+Regras de motion (tokens em `:root` de `css/main.css`):
+- **Ataque instantâneo, release com decaimento.** Pads, playhead e LEDs acendem em 0ms e apagam com `--ease-out` (`cubic-bezier(0.23, 1, 0.32, 1)`), como um LED de hardware. Nunca atrasar o feedback visual de uma batida.
+- **Durações:** `--dur-press` 120ms, `--dur-fast` 160ms (hover/cor), `--dur-release` 240ms, `--dur-decay` 320ms (brilho do pad), `--dur-enter` 480ms (entrada única da página).
+- **Pressionar:** `scale(.97)` (steps: `.94`) com ataque instantâneo e retorno em `--dur-press`.
+- **LED de status** pisca a cada tempo (semínima), disparado pelos mesmos steps agendados do áudio — nunca por um loop CSS desacoplado do BPM.
+- **Só `transform` e `opacity`** para movimento; brilho de hit e playhead usam overlays (`::after`) com opacidade.
+- **Sem `ease-in`** em UI e nada acima de 300ms em controles.
+- **Reduced motion:** remover deslocamento/escala, manter feedback de opacidade e cor.
+
 ## Signature elements
 
 - marca PH em módulo quadrado;

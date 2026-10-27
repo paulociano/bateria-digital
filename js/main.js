@@ -78,6 +78,8 @@ const gridPlayButton = document.querySelector('#grid-play');
 const quickPlayButton = composer.querySelector('.play');
 const machine = document.querySelector('.machine');
 const playbackStatus = document.querySelector('#playback-status');
+const statusDot = document.querySelector('.machine-status__dot');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const keys = document.querySelector('.keys');
 const stepGrid = document.querySelector('#step-grid');
 const selectedSoundLabel = document.querySelector('#selected-sound');
@@ -332,8 +334,10 @@ function soundToKey(sound) {
 function selectSound(sound) {
     if (!sampleUrls[sound]) return;
 
+    const changed = selectedSound !== sound;
     selectedSound = sound;
     selectedSoundLabel.textContent = padLabels[sound];
+    if (changed) restartAnimation(selectedSoundLabel, 'is-swapping');
 
     keys.querySelectorAll('[data-key]').forEach((pad) => {
         pad.classList.toggle('is-selected', pad.dataset.key === sound);
@@ -905,6 +909,7 @@ function scheduleVisualStep(stepIndex, sounds, scheduledTime) {
     trackTimeout(() => {
         if (!isPlaying) return;
         activateStep(stepIndex);
+        flashBeat(stepIndex);
         playbackStatus.textContent = `Passo ${stepIndex + 1}/${currentPattern.length}`;
         sounds.forEach(flashPad);
     }, delay);
@@ -919,6 +924,7 @@ function playFallbackCycle() {
         trackTimeout(() => {
             if (!isPlaying) return;
             activateStep(index);
+            flashBeat(index);
             playbackStatus.textContent = `Passo ${index + 1}/${currentPattern.length}`;
 
             sounds.forEach((sound) => {
@@ -951,6 +957,29 @@ function activateStep(index) {
 
     stepGrid.querySelectorAll(`[data-step="${index}"]`).forEach((current) => {
         current.classList.add('is-current');
+    });
+}
+
+function restartAnimation(element, className) {
+    element.classList.remove(className);
+    void element.offsetWidth;
+    element.classList.add(className);
+}
+
+// Status LED blinks on every quarter note, driven by the same scheduled steps as the audio.
+function flashBeat(stepIndex) {
+    if (stepIndex % 4 !== 0 || !statusDot.animate) return;
+
+    const accent = stepIndex === 0;
+    const glow = { boxShadow: `0 0 ${accent ? 30 : 24}px rgba(255,112,94,1)` };
+    const rest = { boxShadow: '0 0 18px rgba(255,112,94,.7)' };
+    const keyframes = reducedMotion.matches
+        ? [glow, rest]
+        : [{ ...glow, transform: `scale(${accent ? 1.5 : 1.3})` }, { ...rest, transform: 'scale(1)' }];
+
+    statusDot.animate(keyframes, {
+        duration: Math.min(stepDurationSeconds() * 4000 * .85, 420),
+        easing: 'cubic-bezier(0.23, 1, 0.32, 1)'
     });
 }
 
